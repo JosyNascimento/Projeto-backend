@@ -1,0 +1,19 @@
+<h1>Products</h1>
+<div>
+  {{#each payload}}
+    <div>
+      <h2>{{this.name}}</h2>
+      <p>Category: {{this.category}}</p>
+      <p>Price: {{this.price}}</p>
+      <button onclick="addToCart('{{this._id}}')">Add to Cart</button>
+    </div>
+  {{/each}}
+</div>
+<div>
+  {{#if hasPrevPage}}
+    <a href="{{prevLink}}">Previous</a>
+  {{/if}}
+  {{#if hasNextPage}}
+    <a href="{{nextLink}}">Next</a>
+  {{/if}}
+</div>

@@ -1,0 +1,15 @@
+
+      <h1>Carrinho de Compras</h1>
+      <h2>Itens no Carrinho</h2>
+  
+
+<div>
+  {{#each products}}
+    <div>
+      <h2>{{this.product.name}}</h2>
+      <p>Quantity: {{this.quantity}}</p>
+      <button onclick="removeFromCart('{{this.product._id}}')">Remove</button>
+    </div>
+  {{/each}}
+</div>
+<a href="/products">Continue Shopping</a>

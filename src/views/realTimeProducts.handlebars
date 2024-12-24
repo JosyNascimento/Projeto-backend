@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/styles.css">
+  <title>{{title}}</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>{{title}}</h1>
+    </header>
+
+    <section class="product-list-container">
+      <ul id="productList">
+        <!-- Lista de produtos será inserida aqui dinamicamente -->
+      </ul>
+    </section>
+
+    <section class="form-container">
+      <h2>Adicionar Produto</h2>
+      <form id="addProductForm">
+        <input type="text" id="productTitle" placeholder="Nome do Produto" required />
+        <input type="text" id="productDescription" placeholder="Descrição" required />
+        <input type="number" id="productPrice" placeholder="Preço" required />
+        <button type="submit">Adicionar Produto</button>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    const socket = io();  // Conectar ao servidor WebSocket
+
+    // Função para obter a lista de produtos do servidor
+    async function fetchProducts() {
+      try {
+        const response = await fetch('/products');
+        const data = await response.json();
+
+        if (data.products) {
+          const productList = document.getElementById('productList');
+          productList.innerHTML = '';  // Limpa a lista antes de adicionar novos produtos
+
+          // Adiciona cada produto à lista
+          data.products.forEach(product => {
+            const li = document.createElement('li');
+            li.textContent = `${product.title} - ${product.description} - R$${product.price}`;
+            productList.appendChild(li);
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao buscar os produtos:', error);
+      }
+    }
+
+    // Chama a função para carregar os produtos ao carregar a página
+    fetchProducts();
+
+    // Lógica para adicionar um produto via form
+    const addProductForm = document.getElementById('addProductForm');
+    addProductForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('productTitle').value;
+      const description = document.getElementById('productDescription').value;
+      const price = document.getElementById('productPrice').value;
+
+      const newProduct = { title, description, price };
+
+      try {
+        // Adiciona o produto via API
+        const response = await fetch('/addProduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newProduct)
+        });
+
+        const data = await response.json();
+        if (data.message === 'Produto adicionado com sucesso') {
+          // Atualiza a lista de produtos
+          fetchProducts();
+        } else {
+          alert('Erro ao adicionar produto');
+        }
+      } catch (error) {
+        console.error('Erro ao adicionar o produto:', error);
+      }
+    });
+
+     // Função para adicionar produto ao carrinho
+  const addToCartForm = document.getElementById('addToCartForm');
+  addToCartForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const productId = document.getElementById('productId').value;
+    const quantity = document.getElementById('productQuantity').value;
+
+    // ID do usuário e carrinho
+    const cartId = "ID_DO_CARRINHO_AQUI";  // Substitua com o ID do carrinho
+
+    try {
+      const response = await fetch(`/cart/${cartId}/product/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity }),
+      });
+
+      const data = await response.json();
+      if (data.updatedCart) {
+        alert("Produto adicionado ao carrinho!");
+        window.location.reload();  // Recarregar a página para mostrar as atualizações
+      } else {
+        alert("Erro ao adicionar ao carrinho.");
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar ao carrinho:", error);
+      alert("Erro ao adicionar ao carrinho.");
+    }
+  });
+
+    // Atualiza a lista de produtos em tempo real via WebSocket
+    socket.on("updateProducts", (products) => {
+      const productList = document.getElementById('productList');
+      productList.innerHTML = '';  // Limpa a lista antes de adicionar novos produtos
+
+      // Adiciona cada produto à lista
+      products.forEach(product => {
+        const li = document.createElement('li');
+        li.textContent = `${product.title} - ${product.description} - R$${product.price}`;
+        productList.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
