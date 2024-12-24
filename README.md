@@ -1,1 +1,1 @@
-Desafio 6
+Entrega parcial 2 do projeto final
