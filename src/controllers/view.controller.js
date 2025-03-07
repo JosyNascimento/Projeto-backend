@@ -1,4 +1,4 @@
-const userModel = require("../dao/models/user.model");
+const userModel = require("../models/user.model");
 
 const renderHomePage = (req, res) => {
   res.render("home", { title: "Página Inicial", products: [] });

@@ -1,13 +1,20 @@
 const express = require("express");
-const router = express.Router();
+const {
+  authorizationMiddleware,
+} = require("../middlewares/authorization.middleware"); // ✅ Importe o middleware
+
 const {
   getAllProducts,
-  addProduct,
+  createProduct,
+  updateProduct,
   deleteProduct,
-} = require("../controllers/product.controller");
+} = require("../controllers/products.controller");
+
+const router = express.Router();
 
 router.get("/products", getAllProducts);
-router.post("/products", addProduct);
-router.delete("/products/:id", deleteProduct);
+router.post("/", authorizationMiddleware("admin"), createProduct);
+router.put("/:id", authorizationMiddleware("admin"), updateProduct);
+router.delete("/:id", authorizationMiddleware("admin"), deleteProduct);
 
 module.exports = router;

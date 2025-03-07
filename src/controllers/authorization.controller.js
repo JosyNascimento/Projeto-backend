@@ -1,6 +1,6 @@
+// /src/controllers/auth.controller.js
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const User = require("../../dao/models/user.model");
 const passport = require("passport");
 
 const renderLoginPage = (req, res) => {
@@ -9,7 +9,10 @@ const renderLoginPage = (req, res) => {
 
 const githubAuth = passport.authenticate("github", { scope: ["user:email"] });
 
-const githubCallback = passport.authenticate("github", { failureRedirect: "/login" });
+const githubCallback = passport.authenticate("github", {
+  failureRedirect: "/login",
+  successRedirect: "/perfil", // Correção: redirecionamento direto para /perfil
+});
 
 const handleGithubCallback = (req, res) => {
   req.session.user = req.user;
@@ -25,14 +28,15 @@ const loginUser = (req, res, next) => {
       if (err) return next(err);
 
       const token = jwt.sign(
-        { id: user._id, role: user.role },
+        { id: req.user._id, role: req.user.role },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
+      console.log("Token gerado:", token);
 
       res.json({
         message: "Login bem-sucedido",
-        token,
+        token: token, // Correção: envia o token gerado
         user: {
           first_name: user.first_name,
           last_name: user.last_name,

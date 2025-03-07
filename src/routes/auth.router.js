@@ -8,8 +8,9 @@ const {
   loginUser,
   failLogin,
   logoutUser,
-} = require("../../controllers/auth.controller");
+} = require("../controllers/authorization.controller");
 
+router.get('/githubcallback/success', handleGithubCallback);
 router.use((req, res, next) => {
   if (req.session.user) {
     res.locals.user = req.session.user;

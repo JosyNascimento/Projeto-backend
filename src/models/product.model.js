@@ -1,4 +1,4 @@
-// Desafio10/src/dao/models/product.model.js
+// entregaParcial3/src/dao/models/product.model.js
 
 
 const mongoose = require('mongoose');

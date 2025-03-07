@@ -1,0 +1,44 @@
+<div class="profile-container" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+    <div class="profile-card">
+        <h1 style="text-align: center;">Perfil do Usuário</h1>
+        <div class="profile-info">
+            {{#if username}}
+                <p><strong>Nome:</strong> {{ username }}</p>
+            {{else}}
+                <p><strong>Nome:</strong> {{ first_name }} {{ last_name }}</p>
+            {{/if}}
+            <p><strong>E-mail:</strong> {{ email }}</p>
+            {{#if age}}
+                <p><strong>Idade:</strong> {{ age }}</p>
+            {{/if}}
+        </div>
+        <div class="profile-btn-container" style="text-align: center;">
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-info {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .logout-btn {
+        width: 30%;
+        padding: 10px;
+        background-color: #360a1f;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .logout-btn:hover {
+        background-color: #a807a3;
+    }
+</style>
