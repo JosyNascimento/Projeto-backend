@@ -78,19 +78,22 @@ passport.use('github', new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: 'http://localhost:8080/githubcallback',
+    scope: ["user:email"],
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         console.log("🔹 Access Token:", accessToken);
-        console.log("🔹 Profile recebido do GitHub:", profile);
+        console.log("🔹 Profile do GitHub:", profile);
 
-        let user = await User.findOne({ githubId: profile.id });
+        const email = profile.emails?.[0]?.value || null;
+
+        let user = await User.findOne({ githubId: profile.emails });
         if (!user) {
             console.log("🆕 Criando novo usuário GitHub...");
             user = await User.create({
-                username: profile.username,
+                username: profile.displayName || profile.username,
                 githubId: profile.id,
-                email: profile.emails?.[0]?.value || null,
-                profileUrl: profile.profileUrl
+               
+                profileUrl: profile.profileUrl,
             });
             console.log("✅ Usuário GitHub salvo:", user);
         } else {

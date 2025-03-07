@@ -19,30 +19,39 @@ const githubCallback = (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log("Tentativa de login:", email); // Adicione este log
+        console.log("Tentativa de login:", email); 
 
         const user = await User.findOne({ email });
 
         if (!user) {
-            console.log("Usuário não encontrado:", email); // Adicione este log
+            console.log("Usuário não encontrado:", email);
             return res.status(400).json({ message: "Usuário não encontrado" });
         }
 
-           // Se comparePassword não existir, use bcrypt.compare manualmente:
-        const isValid = await user.comparePassword(password);
+        // Se comparePassword não existir, use bcrypt.compare manualmente:
+        const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-            console.log("Senha inválida:", email); // Adicione este log
+            console.log("Senha inválida:", email);
             return res.status(400).json({ message: "Senha inválida" });
         }
 
-        const token = generateToken({ id: user._id, role: user.role });
-        console.log("🟢 Token gerado:", token);
-        res.json({ message: "Login bem-sucedido", token });
+        // Salvando o usuário na sessão
+        req.session.user = {
+            id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            role: user.role,
+        };
+
+        console.log("🟢 Usuário autenticado, redirecionando para perfil...");
+        res.redirect('/profile'); // ✅ Agora redireciona corretamente
     } catch (error) {
         console.error("Erro ao fazer login:", error);
         res.status(500).json({ message: "Erro interno no servidor" });
     }
 };
+
 
 const failLogin = (req, res) => {
     console.log("Falha no login - usuário ou senha inválidos");

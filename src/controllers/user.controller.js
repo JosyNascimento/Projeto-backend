@@ -1,6 +1,9 @@
 const userRepository = require('../repositories/user.repository');
 const { createHash } = require('../utils/password');
 
+const renderLoginPage = (req, res) => {
+    res.render('login');
+};
 const getUserById = async (req, res) => {
     try {
         const user = await userRepository.getUserById(req.params.id);

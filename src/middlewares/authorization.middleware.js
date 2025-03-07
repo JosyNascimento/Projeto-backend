@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
 
-const login = async (req, res) => {  
+const login = async (req, res, next) => {  
+    console.log (req);
     try {
         const user = await User.findOne({ username: req.body.username }); 
 
@@ -31,7 +32,7 @@ const autenticacao = (req, res, next) => {
         // Buscar o token do cabeçalho Authorization
         const token = req.headers.authorization?.split(' ')[1];  // 'Bearer <token>'
 
-        console.log('Token recebido:', token); // Log do token
+        console.log('Token recebido:', req.headers.authorization); // Log do token
 
         if (!token) {
             return res.status(401).json({ message: 'Usuário não autenticado' });
@@ -80,4 +81,4 @@ const authorizationMiddleware = (role) => {
     };
 };
 
-module.exports = { autenticacao, authorizationMiddleware, isAdmin, isUser };
+module.exports = { autenticacao, login, authorizationMiddleware, isAdmin, isUser };

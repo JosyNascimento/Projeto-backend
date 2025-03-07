@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 
 const renderLoginPage = (req, res) => {
-  res.render("login");
+  res.render("profile");
 };
 
 const githubAuth = passport.authenticate("github", { scope: ["user:email"] });
@@ -20,6 +20,7 @@ const handleGithubCallback = (req, res) => {
 };
 
 const loginUser = (req, res, next) => {
+  console.log("Tentativa de login:");
   passport.authenticate("login", (err, user, info) => {
     if (err) return next(err);
     if (!user) return res.status(401).json({ message: "Usuário ou senha inválidos" });

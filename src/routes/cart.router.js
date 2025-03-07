@@ -14,10 +14,10 @@ const {
 } = require("../controllers/cart.controller");
 
 // Verifique se você está passando funções aqui, e não objetos ou valores incorretos
-router.post("/", createCart);  // Esta rota deve chamar createCart corretamente
+router.post("/",authorizationMiddleware('user'), createCart);  // Esta rota deve chamar createCart corretamente
 router.get("/:cid", getCartById);  // Esta rota está correta também
 router.post("/cart", addProductToCart);  // A função addProductToCart deve ser um controlador, não um objeto
-router.put("/:cid/products/:pid", updateCartProductQuantity);
+router.put("/:cid/products/:pid", authorizationMiddleware('user'), updateCartProductQuantity);
 router.get("/", displayCart);
 router.delete("/:cid", clearCart);
 // Rota para realizar a compra e gerar o ticket

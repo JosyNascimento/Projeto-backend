@@ -18,10 +18,10 @@ const authToken = (req, res, next) => {
   const token = authHeader.split(" ")[1];
   console.log("🟣 Token extraído:", token); // LOG DO TOKEN EXTRAÍDO
 
-  jwt.verify(token, PRIVATE_KEY, (err, credentials) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded)=> {
     if (err) {
       console.log(err);
-      return res.status(403).json({ error: "Não esta autorizado" });
+      return res.status(403).json({ error: "Token inválido" });
     }
     req.user = credentials;
     next();

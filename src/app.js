@@ -6,7 +6,6 @@ const handlebars = require("express-handlebars");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const authRouter = require("./routes/auth.router");
 const { Server } = require("socket.io");
 const Message = require("./models/message.model");
 const productRouter = require("./routes/product.router");
@@ -62,13 +61,20 @@ handlebars.create({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: "secret", resave: false, saveUninitialized: true }));
-app.use(autenticacao);
+
 
 app.use("/", sessionRouter);
 app.use("/carts", cartRouter);
 app.use("/products", productRouter);
 app.use("/", viewRouter);
 app.use("/", userRouter);
+
+
+
+
+
+
+
 app.use("/chat", chatRoutes);
 app.use("/test", testRouter);
 app.use("/api", productRouter); // Correção: use productRouter

@@ -44,8 +44,16 @@ const renderProductsPage = (req, res) => {
     welcomeMessage: role === "admin" ? `Bem-vindo, Admin ${username}!` : `Bem-vindo, ${username}!`,
   });
 };
+const renderProfilePage = (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ message: "Usuário não autenticado" });
+  }
+  
+  res.render('profile', { user: req.session.user });
+};
 
 module.exports = {
+  renderProfilePage,
   renderHomePage,
   renderUserList,
   renderRegisterPage,
