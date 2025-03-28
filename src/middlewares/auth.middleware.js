@@ -1,10 +1,9 @@
-// entregaParcial3/src/middlewares/authorization.middleware.js
 const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
+const bcrypt = require('bcryptjs');
+const { User } = require('../models/user.model.js');
 
-
+// Middleware de login para gerar o token
 const login = async (req, res, next) => {  
-    console.log (req);
     try {
         const user = await User.findOne({ username: req.body.username }); 
 
@@ -27,12 +26,11 @@ const login = async (req, res, next) => {
     }
 };
 
+// Middleware de autenticação (verificação do token)
 const autenticacao = (req, res, next) => {
     try {
         // Buscar o token do cabeçalho Authorization
         const token = req.headers.authorization?.split(' ')[1];  // 'Bearer <token>'
-
-        console.log('Token recebido:', req.headers.authorization); // Log do token
 
         if (!token) {
             return res.status(401).json({ message: 'Usuário não autenticado' });
@@ -40,8 +38,6 @@ const autenticacao = (req, res, next) => {
 
         // Verificar o token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'Coder');
-        console.log('Dados Decodificados:', decoded); // Log dos dados decodificados
-
         req.user = decoded;
 
         next(); // Permitir que a requisição continue
@@ -52,6 +48,7 @@ const autenticacao = (req, res, next) => {
     }
 };
 
+// Middleware de verificação de role "admin"
 const isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
         return next();
@@ -59,6 +56,7 @@ const isAdmin = (req, res, next) => {
     res.status(403).json({ message: 'Acesso negado: apenas administradores' });
 };
 
+// Middleware de verificação de role "user"
 const isUser = (req, res, next) => {
     if (req.user && req.user.role === 'user') {
         return next();
@@ -74,11 +72,17 @@ const authorizationMiddleware = (role) => {
         }
 
         if (req.user.role !== role) {
-            return res.status(403).json({ message: "Acesso negado" });
+            return res.status(403).json({ message: `Acesso negado: necessário o papel de ${role}` });
         }
 
         next();
     };
 };
 
-module.exports = { autenticacao, login, authorizationMiddleware, isAdmin, isUser };
+module.exports = { 
+    autenticacao, 
+    login, 
+    authorizationMiddleware, 
+    isAdmin, 
+    isUser 
+};

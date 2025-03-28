@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const {
-  renderLoginPage,
-  githubAuth,
+const { renderRegister, renderForgotPassword } = require('../controllers/viewController');
+const {  renderLoginPage, 
+  loginUser, 
+  githubAuth, 
   githubCallback,
-  handleGithubCallback,
-  loginUser,
-  failLogin,
-  logoutUser,
-} = require("../controllers/authorization.controller");
+  handleGithubCallback, 
+  register, 
+  forgotPassword, 
+  resetPassword } = require("../controllers/authorization.controller");
 
 router.get('/githubcallback/success', handleGithubCallback);
 router.use((req, res, next) => {
@@ -18,11 +18,18 @@ router.use((req, res, next) => {
   next();
 });
 
+router.get("/register", renderRegister);
+router.post("/register", register);
 router.get("/login", renderLoginPage);
 router.get("/github", githubAuth);
 router.get("/githubcallback", githubCallback, handleGithubCallback);
 router.post("/login", loginUser);
-router.get("/faillogin", failLogin);
-router.get("/logout", logoutUser);
+router.get('/forgot-password', renderForgotPassword);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+router.get('/logout', (req, res) => {
+  res.clearCookie('token'); // Limpa o cookie de autenticação
+  res.redirect('/login');
+});
 
 module.exports = router;

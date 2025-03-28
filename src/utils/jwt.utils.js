@@ -1,7 +1,7 @@
 // entregaParcial3/src/utils/jwt.utils.js
 const jwt = require("jsonwebtoken");
 
-const PRIVATE_KEY = process.env.JWT_SECRET || "Coder"; // Use variável de ambiente
+const PRIVATE_KEY = process.env.JWT_SECRET ; // Use variável de ambiente
 
 const generateToken = (user) => {
   return jwt.sign(user, PRIVATE_KEY, { expiresIn: "1h" });
@@ -9,22 +9,21 @@ const generateToken = (user) => {
 
 // Middleware
 const authToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  console.log("🔵 Header Authorization recebido:", authHeader); // LOG DO HEADER RECEBIDO
+  const token = req.cookies.token || req.session.token;
+  console.log("🟣 Token extraído:", token);
 
-  if (!authHeader) {
+  if (!token) {
       return res.status(401).send({ error: "Não está autenticado" });
   }
-  const token = authHeader.split(" ")[1];
-  console.log("🟣 Token extraído:", token); // LOG DO TOKEN EXTRAÍDO
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded)=> {
-    if (err) {
-      console.log(err);
-      return res.status(403).json({ error: "Token inválido" });
-    }
-    req.user = credentials;
-    next();
+  jwt.verify(token, PRIVATE_KEY, (err, credentials) => {
+      if (err) {
+          console.log("Erro ao decodificar o token:", err);
+          return res.status(403).json({ error: "Não esta autorizado" });
+      }
+      console.log("Credenciais decodificadas:", credentials); 
+      req.user = credentials;
+      next();
   });
 };
 

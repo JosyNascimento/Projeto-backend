@@ -1,6 +1,6 @@
-const express = require('express');
-const { sendMessage } = require('../controllers/chat.controller');
-const { autenticacao, isUser } = require('../middlewares/authorization.middleware'); // Importe isUser
+const express = require("express");
+const { sendMessage } = require("../controllers/chat.controller");
+const { autenticacao, isUser } = require("../middlewares/auth.middleware"); // Importe isUser
 
 const router = express.Router();
 

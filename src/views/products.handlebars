@@ -1,27 +1,59 @@
-<!-- views/products.handlebars -->
+<h1>Produtos</h1>
+{{#if user}}
+{{#if isAdminOrPremium}}
+  <a href="/products/add">Adicionar Produto</a>
+{{/if}}
+{{/if}}
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Preço</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each products}}
+    <tr>
+      <td>{{this.name}}</td>
+      <td>R$ {{this.price}},00</td>
+      <td>
+        {{#if ../user}}
+        <button onclick="openModal('{{this._id}}')">Adicionar ao Carrinho</button>
+        {{/if}}
+        {{#if ../isAdminOrPremium}}
+          <a href="/products/edit/{{this._id}}">Editar</a>
+          <form action="/products/{{this._id}}?_method=DELETE" method="post" style="display: inline;">
+            <button type="submit">Excluir</button>
+          </form>
+        {{/if}}
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
 
-<h1>Bem-vindo à nossa loja!</h1>
- {{#if (eq role "admin")}}
-    <p>Você é um administrador.</p>
-  {{else}}
-    <p>Você é um usuário comum.</p>
-  {{/if}}
-<div>
-  {{#each payload}}
-    <div>
-      <h2>{{this.name}}</h2>
-      <p>Category: {{this.category}}</p>
-      <p>Price: {{this.price}}</p>
-      <button onclick="addToCart('{{this._id}}')">Add to Cart</button>
-    </div>
-  {{/each}}
-  <!-- Exibir lista de produtos aqui -->
+<div id="quantityModal"
+  style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+  <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 30%;">
+    <span onclick="closeModal()"
+      style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+    <form id="addToCartForm" action="/cart/add" method="post">
+      <input type="hidden" name="productId" id="modalProductId">
+      <label for="quantity">Quantidade:</label>
+      <input type="number" name="quantity" id="quantity" value="1" min="1">
+      <button type="submit">Adicionar</button>
+    </form>
+  </div>
 </div>
-<div>
-  {{#if hasPrevPage}}
-    <a href="{{prevLink}}">Previous</a>
-  {{/if}}
-  {{#if hasNextPage}}
-    <a href="{{nextLink}}">Next</a>
-  {{/if}}
-</div>
+
+<script>
+  function openModal(productId) {
+    document.getElementById('modalProductId').value = productId;
+    document.getElementById('quantityModal').style.display = "block";
+  }
+
+  function closeModal() {
+    document.getElementById('quantityModal').style.display = "none";
+  }
+</script>

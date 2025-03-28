@@ -1,20 +1,13 @@
-const express = require("express");
-const {
-  authorizationMiddleware,
-} = require("../middlewares/authorization.middleware"); // ✅ Importe o middleware
-
-const {
-  getAllProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} = require("../controllers/products.controller");
-
+const express = require('express');
+const productController = require('../controllers/product.controller');
 const router = express.Router();
 
-router.get("/products", getAllProducts);
-router.post("/", authorizationMiddleware("admin"), createProduct);
-router.put("/:id", authorizationMiddleware("admin"), updateProduct);
-router.delete("/:id", authorizationMiddleware("admin"), deleteProduct);
+// Definindo as rotas
+router.get('/products', productController.getAllProducts);
+router.post('/products', productController.createProduct);
+router.put('/products/:id', productController.updateProduct);
+router.delete('/products/:id', productController.deleteProduct);
+router.get('/add', productController.renderAddProduct);
+router.get('/edit/:id', productController.renderEditProduct);
 
 module.exports = router;

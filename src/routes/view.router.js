@@ -1,22 +1,41 @@
-// entregaParcial3/src/routes/view.router.js
+// src/routes/view.router.js
 const express = require("express");
-const router = express.Router();
-const {
-  renderHomePage,
-  renderUserList,
-  renderRegisterPage,
-  renderUpdateUserPage,
-  renderProductsPage,
-  renderProfilePage,
-} = require('../controllers/view.controller');
-const { authToken } = require("../utils/jwt.utils"); 
+const { authMiddleware } = require("../middlewares/auth.middleware");
+const userController = require("../controllers/user.controller");
 
+console.log("renderUserList está definido?", userController.renderUserList);
+console.log("✅ userController.renderUserList está definido?", typeof userController.renderUserList);
+console.log("🔍 userController:", userController);
+console.log("🔍 renderUserList:", userController.renderUserList);
+
+const {
+    renderHomePage,
+    renderLoginPage,
+    renderRegisterPage,
+    renderProductsPage,
+    renderCarts,
+    renderProfile,
+    renderchat,
+  
+} = require("../controllers/view.controller");
+
+// src/routes/view.router.js (modificado)
+const router = express.Router();
+
+router.get("/teste", (req, res) => {
+    res.send("Rota de teste");
+});
 router.get("/", renderHomePage);
-router.get("/list", renderUserList);
+router.get("/login", renderLoginPage);
 router.get("/register", renderRegisterPage);
-router.get("/update/:id", renderUpdateUserPage);
+router.get("/realtimeproducts", renderProductsPage);
+router.get("/chat", renderchat);
 router.get("/products", renderProductsPage);
-router.get('/profile',renderProfilePage);
+router.get("/cart", authMiddleware, renderCarts);
+router.get("/profile", authMiddleware, renderProfile);
+
+
+router.get("/users", userController.renderUserList);
 
 
 module.exports = router;

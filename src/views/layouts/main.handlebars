@@ -1,50 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet"  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/public/css/main.css">
-  <title>{{title}}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/public/css/main.css">
+    <title>{{title}}</title>
 </head>
 <body>
-  <header>
-    <nav class="navbar navbar-expand-lg custom-navbar">
+    <header>
+        <nav class="navbar navbar-expand-lg custom-navbar">
+            <div class="container">
+                <a href="/" class="navbar-brand">Keraprof</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a href="/" class="nav-link {{#if activeHome}}active{{/if}}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/register" class="nav-link {{#if activeRegister}}active{{/if}}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/list" class="nav-link {{#if activeList}}active{{/if}}">User List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/login" class="nav-link {{#if activeLogin}}active{{/if}}">Login</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-      <div class="container">
-        <a href="/" class="navbar-brand">Keraprof</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a href="/" class="nav-link {{#if activeHome}}active{{/if}}">Home</a>
-            </li>
-            <li class="nav-item">
-              <a href="/register" class="nav-link {{#if activeRegister}}active{{/if}}">Register</a>
-            </li>
-            <li class="nav-item">
-              <a href="/list" class="nav-link {{#if activeList}}active{{/if}}">User List</a>
-            </li>
-            <li class="nav-item">
-              <a href="/login" class="nav-link {{#if activeLogin}}active{{/if}}">Login</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </header>
-  
-  <main class="container my-5">
-    {{{body}}}
-  </main>
+    <main class="container my-5">
+        {{{body}}}
+    </main>
 
-
-  <footer class="footerfooter-expand-lg custom-navbar">
-    <p>&copy; 2024 Keraprof - Todos os direitos reservados</p>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jY38PbCQA9IlOJmRsYlMspv4lmE4"></script>
+    {{> footer}} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jY38PbCQA9IlOJmRsYlMspv4lmE4"></script>
 </body>
 </html>

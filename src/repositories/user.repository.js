@@ -49,13 +49,15 @@ class UserRepository {
 
     async getAllUsers() {
         try {
-            return await User.find();
+            console.log('Iniciando getAllUsers...');
+            const users = await User.find();
+            console.log('Usuários encontrados:', users);
+            return users;
         } catch (error) {
             console.error('Erro ao buscar todos os usuários:', error);
             throw error;
         }
     }
-
 }
 
 module.exports = new UserRepository();

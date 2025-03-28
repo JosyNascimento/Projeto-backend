@@ -1,10 +1,10 @@
+require('dotenv').config(); // Coloque no topo sempre
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 
-env = require('dotenv').config();
 
 // Função para buscar usuário por e-mail
 const findUserByEmail = async (email) => {
@@ -77,51 +77,50 @@ passport.use('login', new LocalStrategy({ usernameField: 'email', passwordField:
 passport.use('github', new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: 'http://localhost:8080/githubcallback',
-    scope: ["user:email"],
+    callbackURL: process.env.CALLBACK_URL,
 }, async (accessToken, refreshToken, profile, done) => {
+    console.log('AccessToken:', accessToken);
+    console.log('refreshToken:', refreshToken);
     try {
-        console.log("🔹 Access Token:", accessToken);
-        console.log("🔹 Profile do GitHub:", profile);
-
-        const email = profile.emails?.[0]?.value || null;
-
-        let user = await User.findOne({ githubId: profile.emails });
-        if (!user) {
-            console.log("🆕 Criando novo usuário GitHub...");
-            user = await User.create({
-                username: profile.displayName || profile.username,
-                githubId: profile.id,
-               
-                profileUrl: profile.profileUrl,
-            });
-            console.log("✅ Usuário GitHub salvo:", user);
+        console.log(profile);
+        if (profile._json && profile._json.email && profile._json.name) {
+            let user = await User.findOne({ email: profile._json.email });
+            if (!user) {
+                let newUser = {
+                    first_name: profile._json.name.split(' ')[0],
+                    last_name: profile._json.name.split(' ')[1],
+                    age: profile._json.age || 18,
+                    email: profile._json.email,
+                    password: "",
+                };
+                let result = await User.create(newUser);
+                return done(null, result);
+            } else {
+                return done(null, user);
+            }
         } else {
-            console.log("🔄 Usuário GitHub já existe:", user);
+            return done("Erro: Dados do perfil do GitHub incompletos.");
         }
-
-        return done(null, user);
     } catch (error) {
-        console.error("❌ Erro na autenticação do GitHub:", error);
-        return done(error);
+        return done(`Erro ao autenticar usuário: ${error}`);
     }
 }));
 
 // Estratégia de Reset de Senha
 passport.use('reset-password', new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (username, password, done) => {
     try {
-        const userFound = await findUserByEmail(username);
+        const userFound = await User.findOne({ email: username });
+
         if (!userFound) {
-            console.log("Usuário não encontrado para redefinição de senha");
+            console.log("User not found");
             return done(null, false, { message: 'Usuário não encontrado' });
         }
-
         const newPass = createHash(password);
+
         await User.updateOne({ email: username }, { password: newPass });
-        console.log("🔄 Senha redefinida com sucesso para:", username);
         return done(null, userFound);
     } catch (error) {
-        return done(null, false, { message: `Erro ao alterar a senha: ${error}` });
+        return done(null, false, { message: `Erro ao alterar a password do usuário: ${error}` });
     }
 }));
 

@@ -48,6 +48,55 @@ const loginUser = (req, res, next) => {
   })(req, res, next);
 };
 
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).send('Usuário não encontrado');
+    }
+    // Gera um token de redefinição de senha validação de 1 hora
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+
+    await User.updateOne({ _id: user._id }, {
+      resetPasswordToken: resetToken,
+      resetPasswordExpires: user.resetPasswordExpires,
+    });
+//link para redefinir a senha enviado por email
+    const resetLink = `http://localhost:8080/reset-password/${resetToken}`;
+    await sendEmail(email, 'Recuperação de Senha', `Clique <a href="${resetLink}">aqui</a> para redefinir sua senha.`);
+    res.redirect('/forgot-password-success');
+  } catch (error) {
+    res.status(500).send('Erro ao solicitar recuperação de senha');
+  }
+};
+const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res.status(400).send('Token inválido ou expirado');
+    }
+//valida se a senha foi alterada
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      return res.status(400).send('Não é possível utilizar a mesma senha!');
+    }
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    res.redirect('/login');
+  } catch (error) {
+    res.status(500).send('Erro ao redefinir senha');
+  }
+};
+
 const failLogin = (req, res) => {
   res.status(401).json({ message: "Usuário ou senha inválidos" });
 };
@@ -64,6 +113,8 @@ const logoutUser = (req, res) => {
 
 module.exports = {
   renderLoginPage,
+  forgotPassword,
+  resetPassword, 
   githubAuth,
   githubCallback,
   handleGithubCallback,
