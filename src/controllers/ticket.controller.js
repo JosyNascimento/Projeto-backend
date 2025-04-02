@@ -2,27 +2,29 @@
 const TicketDAO = require('../dao/ticket.dao');
 const CartDAO = require('../dao/cart.dao'); //
 const ticketRepository = require('../repositories/ticket.repository');
+const { validationResult } = require('express-validator');
 
 // Função para finalizar a compra e gerar um ticket
 const createTicket = async (req, res) => {
     try {
-        const { cid } = req.params;
-        const userId = req.user.id; // Obtendo o ID do usuário autenticado
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
-        // Buscar o carrinho pelo ID
+        const { cid } = req.params;
+        const userId = req.user.id;
+
         const cart = await CartDAO.getCartById(cid);
 
         if (!cart) {
             return res.status(404).json({ message: 'Carrinho não encontrado' });
         }
 
-        // Verificar estoque e preparar os dados dos produtos para o ticket
-        const products = cart.products; // Assumindo que cart.products contém os dados dos produtos
+        const products = cart.products;
 
-        // Criar o ticket de compra
         const ticket = await TicketDAO.createTicket(userId, products);
 
-        // Limpar o carrinho após a compra (opcional)
         await CartDAO.clearCart(cid);
 
         return res.status(201).json({ message: 'Compra realizada com sucesso', ticket });
@@ -55,6 +57,8 @@ const getTicketsByUserId = async (req, res) => {
         return res.status(500).json({ message: 'Erro ao buscar tickets do usuário' });
     }
 };
+
+
 
 module.exports = {
     createTicket,

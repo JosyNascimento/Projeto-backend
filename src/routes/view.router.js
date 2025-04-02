@@ -2,7 +2,6 @@
 const express = require("express");
 const { authMiddleware } = require("../middlewares/auth.middleware");
 const userController = require("../controllers/user.controller");
-
 console.log("renderUserList está definido?", userController.renderUserList);
 console.log("✅ userController.renderUserList está definido?", typeof userController.renderUserList);
 console.log("🔍 userController:", userController);
@@ -11,8 +10,10 @@ console.log("🔍 renderUserList:", userController.renderUserList);
 const {
     renderHomePage,
     renderLoginPage,
-    renderRegisterPage,
     renderProductsPage,
+    renderRegisterPage,
+    renderUpdateUserPage,
+    githubCallback,
     renderCarts,
     renderProfile,
     renderchat,
@@ -31,8 +32,8 @@ router.get("/register", renderRegisterPage);
 router.get("/realtimeproducts", renderProductsPage);
 router.get("/chat", renderchat);
 router.get("/products", renderProductsPage);
-router.get("/cart", authMiddleware, renderCarts);
-router.get("/profile", authMiddleware, renderProfile);
+router.get("/cart",  renderCarts);
+router.get("/profile",  renderProfile);
 
 
 router.get("/users", userController.renderUserList);

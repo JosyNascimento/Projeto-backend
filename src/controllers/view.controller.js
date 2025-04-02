@@ -3,7 +3,7 @@ const userModel = require("../models/user.model");
 const jwt = require('jsonwebtoken');
 
 
-const renderHome = (req, res) => {
+const renderHomePage = (req, res) => {
     const token = req.cookies.token;
     if (token) {
       try {
@@ -32,6 +32,11 @@ const renderUpdateUserPage = async (req, res) => {
         return res.render("error", { error: error.message });
     }
 };
+
+const renderLoginPage = (req, res) => {
+    res.render('login');
+};
+
 
 const githubCallback = (req, res) => {
     console.log(" Callback do GitHub chamado");
@@ -78,7 +83,8 @@ const renderProductsPage = (req, res) => {
 };
 
 module.exports = {
-    renderHome,
+    renderHomePage,
+    renderLoginPage,
     renderProductsPage,
     renderRegisterPage,
     renderUpdateUserPage,

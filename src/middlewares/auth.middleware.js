@@ -64,6 +64,23 @@ const isUser = (req, res, next) => {
     res.status(403).json({ message: 'Acesso negado: apenas usuários' });
 };
 
+// Middleware para verificar se o usuário está autenticado
+const authMiddleware = (req, res, next) => {
+    if (req.isAuthenticated()) {
+      return next(); // O usuário está autenticado, podemos continuar
+    }
+    res.status(401).json({ error: "Não autorizado. Faça login primeiro." }); // Se não, retorna erro 401
+  };
+  
+  // Middleware para verificar se o usuário é um administrador
+  const adminMiddleware = (req, res, next) => {
+    if (req.user && req.user.role === "admin") {
+      return next(); // O usuário tem o papel de administrador, podemos continuar
+    }
+    res.status(403).json({ error: "Acesso negado. Somente administradores podem realizar essa ação." }); // Se não for admin, retorna erro 403
+  };
+  
+
 // Middleware de autorização com base no role
 const authorizationMiddleware = (role) => {
     return (req, res, next) => {
@@ -81,8 +98,10 @@ const authorizationMiddleware = (role) => {
 
 module.exports = { 
     autenticacao, 
+    authMiddleware, 
+    adminMiddleware,
     login, 
     authorizationMiddleware, 
     isAdmin, 
-    isUser 
+    isUser,
 };

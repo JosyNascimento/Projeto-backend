@@ -3,9 +3,6 @@ const passport = require('../config/passport.config.js');
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 
-const renderLoginPage = (req, res) => {
-    res.render('login');
-};
 
 const githubAuth = passport.authenticate('github');
 
@@ -68,7 +65,7 @@ const logoutUser = async (req, res, next) => {
 };
 
 module.exports = {
-    renderLoginPage,
+    
     githubAuth,
     githubCallback,
     loginUser,

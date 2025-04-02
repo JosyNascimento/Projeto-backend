@@ -19,8 +19,8 @@ const cartRouter = require("./routes/cart.router");
 const sessionRouter = require("./routes/session.router");
 const { autenticacao } = require("./middlewares/auth.middleware");
 const session = require("express-session");
-const connectDB = require("./config/connection");
-const methodOverride = require("method-override");
+const connectDB = require("./config/connectDB");
+const methodOverride = require("method-override"); 
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
