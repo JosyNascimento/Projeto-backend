@@ -1,1 +1,4 @@
-desafio 10 Reestruturação do nosso servidor da aula 27 Arquitetura do Servidor: Design
+Projeto Final do Curso Backend 
+
+Ter uma experiência de compra completa
+Fechar detalhes administrativos com funções.
