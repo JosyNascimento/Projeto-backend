@@ -40,26 +40,29 @@ io.on("connection", async (socket) => {
 app.engine(
   "handlebars",
   handlebars.engine({
-    runtimeOptions: {
-      allowProtoPropertiesByDefault: true,
-      allowProtoMethodsByDefault: true,
-    },
-    helpers: {
-      or: function (a, b) {
-        return a || b;
+      runtimeOptions: {
+          allowProtoPropertiesByDefault: true,
+          allowProtoMethodsByDefault: true,
       },
-      eq: function (a, b) {
-        return a === b;
+      helpers: {
+          or: function (a, b) {
+              return a || b;
+          },
+          eq: function (a, b) {
+              return a === b;
+          },
+          isAdmin: function (user) {
+              return user && user.role === "admin";
+          },
+          ifEquals: function (arg1, arg2, options) {
+              return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+          }
       },
-      isAdmin: function (user) {
-        return user && user.role === "admin";
-      },
-    },
   })
 );
-
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
+
 app.use(methodOverride("_method"));
 app.use(cookieParser());
 app.use(express.json());
@@ -90,6 +93,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // ✅ Rotas organizadas
+app.use("/", viewRouter); 
 app.use("/api/sessions", sessionRouter);
 app.use("/", sessionRouter);
 app.use("/carts", cartRouter);
@@ -119,6 +123,12 @@ app.use((err, req, res, next) => {
   // Trate erros globais aqui
   res.status(500).json({ message: "Erro interno do servidor" });
 });
+
+app.use((err, req, res, next) => {
+  console.error("🔥 ERRO DETECTADO:", err.stack || err);
+  res.status(500).json({ message: "Erro interno do servidor", error: err.message });
+});
+
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

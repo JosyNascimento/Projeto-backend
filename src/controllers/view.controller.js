@@ -1,7 +1,7 @@
 //src/controllers/view.controller.js
 const userModel = require("../models/user.model");
 const jwt = require('jsonwebtoken');
-
+const User = require("../models/user.model"); 
 
 const renderHomePage = (req, res) => {
     const token = req.cookies.token;
@@ -56,9 +56,47 @@ const renderProfile = (req, res) => {
         return res.redirect('/login');
     }
 
-    console.log("🟢 Dados do usuário na sessão ao acessar /profile:", req.session.user);
+    console.log("🔍 Usuário na sessão:", req.session.user);
+    console.log("🔹 Tentando renderizar perfil...");
+
     res.render('profile', { user: req.session.user });
+
+    console.log("✅ Página perfil renderizada com sucesso!");
+    console.log("🔹 Finalizando a requisição...");
 };
+
+// Definição da função UserList
+const renderUserList = async (req, res) => {
+    console.log("renderUserList chamado!");
+    console.log("req.user:", req.user);
+    try {
+        let users = await User.find();
+        users = users.map((user) => user.toJSON());
+        console.log("Usuários encontrados:", users);
+  
+        return res.render("userList", {
+            users,
+            user: req.user, // ✅ Passando o usuário para a vie
+            isAdmin: req.user && req.user.role === "admin",
+        });
+    } catch (error) {
+        console.error("Erro em renderUserList:", error);
+        return res.status(500).render("error", {
+            message: "Erro ao buscar lista de usuários.",
+            error: error.message,
+        });
+    }
+  };
+  
+  const getAllUsers = async (req, res) => {
+    try {
+      const users = await User.find().lean();
+      const user = req.user;
+      res.render("adminUsers", { users, title: "Lista de Usuários", user });
+    } catch (error) {
+      res.status(500).send("Erro ao buscar lista de usuários");
+    }
+  };
 
 const renderchat = (req, res) => res.render('chat');
 
@@ -92,4 +130,6 @@ module.exports = {
     renderCarts,
     renderProfile,
     renderchat,
+    getAllUsers,
+    renderUserList,
 };

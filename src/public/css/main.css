@@ -89,17 +89,22 @@ h1 {
     max-width: 800px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #7fb187;
+    background-color: #ee7ccc38;
     border-radius:20px;
-    box-shadow: 0 4px 10px rgb(102, 3, 57);
+    box-shadow: 0 4px 10px rgb(228, 7, 7);
   }
+
+  .user-actions {
+    display: flex;
+    align-items: center; /* Alinha os botões verticalmente ao centro */
+    gap: 10px; /* Adiciona espaçamento entre os botões */
+}
 
   .list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 15px;
-  
     border-radius: 5px;
     margin-bottom: 10px;
     transition: background-color 0.3s ease;
@@ -120,10 +125,14 @@ h1 {
  
   
   .list li:hover {
-    background-color: #e6f7e9;
+    background-color: #92bad4;
   }
   
   /* Botões */
+  .user-actions {
+    display: flex;
+    gap: 10px; /* Adiciona espaçamento entre os botões */
+}
   button {
     padding: 8px 12px;
     border: none;
@@ -164,8 +173,21 @@ h1 {
   border-radius: 5px;
   cursor: pointer;
   transition: transform 0.2s, background-color 0.3s;
+  height: 36px; /* Ajuste a altura dos botões para alinhar com o texto */
+}
+.premium-button {
+  background-color: #410a2e; 
+  color: white; 
+  padding: 8px 12px; 
+  border: none; 
+  border-radius: 5px; 
+  cursor: pointer;
+  transition: background-color 0.3s ease; 
 }
 
+.premium-button:hover {
+  background-color: #63123f;
+}
   /* Responsividade */
   @media (max-width: 768px) {
     .list {

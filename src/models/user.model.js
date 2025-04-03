@@ -1,3 +1,4 @@
+// entregaParcial3/src/models/user.model.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 

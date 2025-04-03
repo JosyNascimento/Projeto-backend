@@ -28,25 +28,14 @@ const login = async (req, res, next) => {
 
 // Middleware de autenticação (verificação do token)
 const autenticacao = (req, res, next) => {
-    try {
-        // Buscar o token do cabeçalho Authorization
-        const token = req.headers.authorization?.split(' ')[1];  // 'Bearer <token>'
-
-        if (!token) {
-            return res.status(401).json({ message: 'Usuário não autenticado' });
-        }
-
-        // Verificar o token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'Coder');
-        req.user = decoded;
-
-        next(); // Permitir que a requisição continue
-
-    } catch (error) {
-        console.error('Erro de autenticação:', error);
-        return res.status(401).json({ message: 'Autenticação falhou' });
+    console.log("🔍 Sessão atual:", req.session); // Verifica se a sessão está sendo mantida corretamente
+    if (!req.session || !req.session.user) {
+        console.log("⚠️ Acesso negado: Usuário não autenticado!");
+        return res.status(401).json({ message: "Usuário não autenticado" });
     }
+    next();
 };
+
 
 // Middleware de verificação de role "admin"
 const isAdmin = (req, res, next) => {

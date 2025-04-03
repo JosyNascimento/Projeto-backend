@@ -5,6 +5,9 @@ const authorizationMiddleware = require("../middlewares/auth.middleware");
 const userController = require("../controllers/user.controller");
 const User = require('../models/user.model');
 const { getProfile, togglePremium, changeRole, getAllUsers, renderResetPasswordPage, failResetPassword, resetPassword } = require('../controllers/user.controller'); // Importação única
+const adminMiddleware = require('../middlewares/admin.middleware');
+const { authMiddleware} = require('../middlewares/auth.middleware');
+const methodOverride = require('method-override');
 
 const router = express.Router();
 
@@ -13,7 +16,7 @@ router.get("/registro", (req, res) => {
   res.render("registro");
 });
 // Registrando um novo usuário
-router.post("/register", userController.registerUser);
+router.post("/registro", userController.registerUser);
 
 // Rota para obter o perfil do usuário (protege a rota com authMiddleware)
 router.get("/perfil", authorizationMiddleware.autenticacao, getProfile);
@@ -42,12 +45,15 @@ router.post(
   resetPassword
 );
 // Admin rotas (usando authMiddleware e adminMiddleware para garantir que o usuário é admin)
-const { authMiddleware, adminMiddleware } = require('../middlewares/auth.middleware');
-const methodOverride = require('method-override');
+
 router.use(methodOverride('_method'));
 router.get('/profile', authMiddleware, getProfile);
 router.get('/premium/:uid', authMiddleware, adminMiddleware, togglePremium);
 router.put('/premium/:uid', authMiddleware, adminMiddleware, changeRole);
-router.get('/', authMiddleware, adminMiddleware, getAllUsers);
+router.delete('/users/:uid', adminMiddleware, userController.deleteUser);
+router.get('/admin/users/:uid', adminMiddleware, userController.adminUsers); // Rota para adminUsers.handlebars
+router.put('/users/:uid/role', adminMiddleware, userController.changeRole);
+
 
 module.exports = router;
+

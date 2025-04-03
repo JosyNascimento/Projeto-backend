@@ -27,51 +27,55 @@ const createHash = (password) => {
 };
 
 // Estratégia de Registro
-passport.use('register', new LocalStrategy({
-    passReqToCallback: true, usernameField: 'email', passwordField: 'password'
-}, async (req, username, password, done) => {
-    const { first_name, last_name, email } = req.body;
-    try {
-        let user = await findUserByEmail(username);
-        if (user) {
-            console.log("Usuário já cadastrado");
-            return done(null, false, { message: 'E-mail já registrado' });
+passport.use('login', new LocalStrategy(
+    { usernameField: 'email', passwordField: 'password' },
+    async (email, password, done) => {
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return done(null, false, { message: 'Usuário não encontrado' });
+            }
+            const validPassword = await comparePassword(password, user.password);
+            if (!validPassword) {
+                return done(null, false, { message: 'Senha incorreta' });
+            }
+            return done(null, user);
+        } catch (err) {
+            return done(err);
         }
-
-        const newUser = new User({ first_name, last_name, email, password: createHash(password) });
-        let result = await newUser.save();
-        return done(null, result);
-    } catch (error) {
-        console.error(`Erro ao registrar usuário: ${error}`);
-        return done(null, false, { message: 'Erro ao registrar o usuário' });
     }
-}));
+));
+
 
 // Estratégia de Login
-passport.use('login', new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (username, password, done) => {
-    try {
-        let user = await findUserByEmail(username);
-        if (!user) {
-            console.log("Usuário não encontrado");
-            return done(null, false, { message: 'Usuário não encontrado' });
+passport.use('login', new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, 
+    async (email, password, done) => {
+        try {
+            let user = await User.findOne({ email });
+            if (!user) {
+                console.log("❌ Usuário não encontrado:", email);
+                return done(null, false, { message: 'Usuário não encontrado' });
+            }
+
+            console.log("✅ Usuário encontrado:", user.email);
+            console.log("🔑 Senha salva no banco:", user.password);
+
+            const passwordMatch = isValidPassword(password, user.password);
+            console.log("🔍 Comparação de senha:", passwordMatch);
+
+            if (!passwordMatch) {
+                console.log("❌ Senha inválida");
+                return done(null, false, { message: 'Senha inválida' });
+            }
+
+            return done(null, user);
+        } catch (error) {
+            console.error("🔥 Erro interno na autenticação:", error);
+            return done(error);
         }
-
-        console.log("✅ Usuário encontrado:", user.email);
-        console.log("🔑 Senha salva no banco:", user.password);
-
-        const passwordMatch = isValidPassword(password, user.password);
-        console.log("🔍 Comparação de senha:", passwordMatch);
-
-        if (!passwordMatch) {
-            console.log("❌ Senha inválida");
-            return done(null, false, { message: 'Senha inválida' });
-        }
-
-        return done(null, user);
-    } catch (error) {
-        return done(`Erro ao autenticar usuário: ${error}`);
     }
-}));
+));
+
 
 // Estratégia de Login com GitHub
 passport.use('github', new GitHubStrategy({
@@ -132,10 +136,16 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
     try {
         let user = await User.findById(id);
+        if (!user) {
+            console.log("⚠️ Usuário não encontrado no deserializeUser:", id);
+            return done(null, false);
+        }
         done(null, user);
     } catch (error) {
-        done(`Erro ao buscar usuário: ${error}`);
+        console.error("🔥 Erro ao buscar usuário no deserializeUser:", error);
+        done(error);
     }
 });
+
 
 module.exports = passport;

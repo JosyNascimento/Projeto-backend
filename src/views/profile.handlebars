@@ -1,9 +1,10 @@
 <div class="profile-container">
     <div class="profile-card">
         <h1>Perfil do Usuário</h1>
-        <h2>Bem-vindo, {{user.name}}!</h2>
+        
+        <h2>Bem-vindo, {{user.first_name}}!</h2>
+
         <div class="profile-info">
- 
             {{#if user.username}}
                 <p><strong>Nome:</strong> {{ user.username }}</p>
             {{else}}
@@ -11,13 +12,15 @@
             {{/if}}
 
             <p><strong>E-mail:</strong> {{ user.email }}</p>
-
+            <p><strong>Role:</strong> {{ user.role }}</p>
         </div>
+
         <div class="profile-btn-container">
             <a href="/logout" class="logout-btn">Logout</a>
         </div>
     </div>
 </div>
+
 
 <style>
     .profile-container {

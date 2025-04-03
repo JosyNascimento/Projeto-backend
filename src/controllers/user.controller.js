@@ -1,86 +1,36 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
-const getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).lean();
-    if (!user) {
-      return res.status(404).send("Usuário não encontrado");
-    }
-    res.render("userProfile", { user, title: "Perfil do Usuário" });
-  } catch (error) {
-    res.status(500).send("Erro ao buscar perfil do usuário");
-  }
-};
 
-const renderUserList = async (req, res) => {
-  console.log("renderUserList chamado!");
-  console.log("req.user:", req.user);
+async function getProfile(req, res) {
   try {
-      let users = await User.find();
-      users = users.map((user) => user.toJSON());
-      console.log("Usuários encontrados:", users);
+      console.log("🟢 Acessando perfil...");
+      console.log("🔍 Usuário na sessão:", req.session.user);
 
-      return res.render("userList", {
-          users,
-          user: req.user,
-          isAdmin: req.user && req.user.role === "admin",
-      });
-  } catch (error) {
-      console.error("Erro em renderUserList:", error);
-      return res.render("error", { error: error.message });
-  }
-};
+      console.log("🔹 Tentando renderizar perfil...");
+      res.redirect('/profile');  // ✅ REDIRECIONA PARA A VIEW
+      console.log("✅ Página perfil renderizada com sucesso!");
 
-
-// Definição da função UserList
-const UserList = async (req, res) => {
-  console.log("UserList chamado!");
-  console.log("req.user:", req.user);
-  try {
-      const users = await User.find().lean();
-      res.render("userList", { users, title: "Lista de Usuários" });
+      console.log("🔹 Finalizando a requisição...");
   } catch (error) {
-      console.error("Erro em UserList:", error);
-      res.status(500).send("Erro ao buscar lista de usuários");
+      console.error("❌ Erro ao renderizar perfil:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
   }
-};
-const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find().lean();
-    const user = req.user;
-    res.render("adminUsers", { users, title: "Lista de Usuários", user });
-  } catch (error) {
-    res.status(500).send("Erro ao buscar lista de usuários");
-  }
-};
+}
 
 const changeRole = async (req, res) => {
   try {
-    const { uid } = req.params;
-    const user = await User.findById(uid);
-
-    if (!user) {
-      return res.status(404).send("Usuário não encontrado");
-    }
-
-    switch (user.role) {
-      case "user":
-        user.role = "premium";
-        break;
-      case "premium":
-        user.role = "user";
-        break;
-      default:
-        return res.status(400).send("Função de usuário inválida");
-    }
-
-    await user.save();
-    res.redirect("/users");
+      console.log('Iniciando changeRole...');
+      const { uid } = req.params;
+      const { role } = req.body;
+      console.log('uid:', uid, 'role:', role);
+      await User.findByIdAndUpdate(uid, { role });
+      console.log('Role do usuário atualizada com sucesso.');
+      res.status(200).json({ message: `Role do usuário alterada para ${role} com sucesso.` });
   } catch (error) {
-    res.status(500).send("Erro ao atualizar função do usuário");
+      console.error('Erro ao alterar role do usuário:', error);
+      res.status(500).json({ message: 'Erro ao alterar role do usuário.' });
   }
 };
-
 // Função de registro de usuário
 const registerUser = async (req, res) => {
   const { email, password, name } = req.body;
@@ -94,20 +44,6 @@ const registerUser = async (req, res) => {
     res.status(500).json({ error: "Erro ao registrar usuário." });
   }
 };
-
-const getUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).lean(); // Supondo que o ID do usuário esteja disponível em req.user
-    if (!user) {
-      return res.status(404).send("Usuário não encontrado");
-    }
-    res.render("userProfile", { user, title: "Perfil do Usuário" });
-  } catch (error) {
-    console.error("Erro ao buscar perfil do usuário:", error);
-    res.status(500).send("Erro ao buscar perfil do usuário");
-  }
-};
-
 const renderResetPasswordPage = (req, res) => {
   res.render("resetPassword", { title: "Redefinir Senha" });
 };
@@ -166,7 +102,30 @@ const togglePremium = async (req, res) => {
     res.status(500).send("Erro ao alterar função do usuário");
   }
 };
-console.log("🛠 Exportando renderUserList:", renderUserList);
+const deleteUser = async (req, res) => {
+  try {
+      const { uid } = req.params;
+      await User.findByIdAndDelete(uid);
+      res.status(200).json({ message: 'Usuário deletado com sucesso.' });
+  } catch (error) {
+      console.error('Erro ao deletar usuário:', error);
+      res.status(500).json({ message: 'Erro ao deletar usuário.' });
+  }
+};
+
+const adminUsers = async (req, res) => {
+  try {
+      const { uid } = req.params;
+      const user = await User.findById(uid);
+      const users = await User.find(); // Recupera a lista de usuários
+      res.render('adminUsers', { user, users }); // Passa user e users para a view
+  } catch (error) {
+      console.error('Erro ao editar usuário:', error);
+      res.status(500).send('Erro ao editar usuário.');
+  }
+};
+
+
 
 
 module.exports = {
@@ -177,7 +136,7 @@ module.exports = {
   getProfile,
   togglePremium,
   changeRole,
-  getAllUsers,
-  renderUserList,
-  UserList,
+  deleteUser,
+  adminUsers,
+  changeRole,
 };
