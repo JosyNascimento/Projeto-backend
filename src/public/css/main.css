@@ -25,7 +25,7 @@ body, html {
 }
 
 .custom-navbar {
-    background-color: #41072d; 
+    background-color: #971068; 
     color: rgb(255, 255, 255);
   }
   
@@ -43,6 +43,70 @@ body, html {
     margin-right: 30%;
 }
 
+/* Estilos do cabeçalho */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.search-input {
+  padding: 8px 30px 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  color: #f8f2f2;
+}
+
+.user-link {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.user-avatar {
+  font-size: 1.5rem;
+  color: #f7efef;
+  margin-right: 0.5rem;
+}
+
+.user-message {
+  font-size: 0.9rem;
+}
+.cart-fav-icons {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.cart-icon{
+  font-size: 1.5rem;
+  color: #fafaf7;
+  margin-left: 3rem;
+}
+
+.fav-icon {
+  font-size: 1.5rem;
+  color: #fcfbf8;
+  margin-left: 3rem;
+}
+.fav-icon:hover {
+  color: red; /* Define a cor vermelha ao passar o mouse */
+}
+.cart-icon :hover {
+  color: rgb(28, 110, 218);
+}
+.user-message a {
+  color: #f4f6f8; /* Cor dos links */
+  text-decoration: none;
+}
+
 /* ... outros estilos */
 
 @media (max-width: 768px) {
@@ -53,7 +117,7 @@ body, html {
 }
 
 h1 {
-    color: #520831;
+    color: #360521;
     padding: 50px;
 }
 
@@ -176,7 +240,7 @@ h1 {
   height: 36px; /* Ajuste a altura dos botões para alinhar com o texto */
 }
 .premium-button {
-  background-color: #410a2e; 
+  background-color: #850e5b; 
   color: white; 
   padding: 8px 12px; 
   border: none; 
@@ -187,6 +251,7 @@ h1 {
 
 .premium-button:hover {
   background-color: #63123f;
+  margin-left: 1rem;
 }
   /* Responsividade */
   @media (max-width: 768px) {
