@@ -1,3 +1,4 @@
+// routes/chat.router.js
 const express = require("express");
 const { sendMessage } = require("../controllers/chat.controller");
 const { autenticacao, isUser } = require("../middlewares/auth.middleware"); // Importe isUser

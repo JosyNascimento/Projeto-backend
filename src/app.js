@@ -13,7 +13,7 @@ const passport = require("./config/passport.config");
 const mongoStore = require("connect-mongo");
 const viewRouter = require("./routes/view.router");
 const testRouter = require("./routes/test.router");
-const chatRoutes = require("./routes/chat.router");
+const chatRouter = require("./routes/chat.router");
 const userRouter = require("./routes/user.router");
 const cartRouter = require("./routes/cart.router");
 const sessionRouter = require("./routes/session.router");
@@ -30,12 +30,33 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
-
-io.on("connection", async (socket) => {
-  // ... lógica do Socket.IO ...
+// 🔥 Socket.IO com CORS habilitado
+const io = new Server(server, {
+  cors: {
+      origin: "http://localhost:8080", // ou "*" para liberar geral
+      methods: ["GET", "POST"]
+  }
 });
 
+// Disponibiliza o io para os controllers acessarem
+app.set("io", io);
+
+// Configuração do WebSocket
+io.on("connection", async (socket) => {
+  console.log("🟢 Um usuário se conectou!");
+  // Exemplo: histórico ou mensagem ao conectar
+  socket.emit("messageHistory", []); // Pode enviar mensagens salvas do banco aqui
+
+  socket.on("newMessage", async (msg) => {
+    try {
+      await Message.create({ user: msg.user, message: msg.message });
+      io.emit("newMessage", msg);
+    } catch (error) {
+      console.error("Erro ao salvar mensagem:", error);
+    }
+  });
+  
+});
 // ✅ Configuração do Handlebars
 app.engine(
   "handlebars",
@@ -65,6 +86,7 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(methodOverride("_method"));
 app.use(cookieParser());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
@@ -100,9 +122,8 @@ app.use("/carts", cartRouter);
 app.use("/products", productRouter);
 app.use("/", viewRouter);
 app.use("/", userRouter);
-app.use("/chat", chatRoutes);
+app.use("/chat", chatRouter);
 app.use("/test", testRouter);
-
 
 // Swagger setup
 const swaggerOptions = {

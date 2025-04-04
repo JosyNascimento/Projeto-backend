@@ -1,4 +1,4 @@
-// /src/controllers/auth.controller.js
+// /src/controllers/authorization.controller.js
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
@@ -111,6 +111,31 @@ const logoutUser = (req, res) => {
   });
 };
 
+function autenticacao(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+      return res.status(401).json({ error: 'Token não fornecido.' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+          return res.status(403).json({ error: 'Token inválido.' });
+      }
+
+      req.user = decoded;
+      next();
+  });
+}
+
+function isUser(req, res, next) {
+  if (req.user.role === 'user' || req.user.role === 'admin' || req.user.role === 'premium') {
+      next();
+  } else {
+      return res.status(403).json({ error: 'Acesso negado. Apenas usuários podem acessar o chat.' });
+  }
+}
+
 module.exports = {
   renderLoginPage,
   forgotPassword,
@@ -121,4 +146,6 @@ module.exports = {
   loginUser,
   failLogin,
   logoutUser,
+  autenticacao,
+  isUser,
 };

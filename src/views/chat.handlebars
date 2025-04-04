@@ -1,31 +1,36 @@
 <div>
-  <h1>Chat</h1>{{#if isChat}}
-  {{> chat}}
-{{/if}}
-  <form id="chatForm">
-    <input type="text" id="user" placeholder="Seu email" required />
-    <textarea id="message" placeholder="Sua mensagem" required></textarea>
-    <button type="submit">Enviar</button>
-  </form>
-  <ul id="messages"></ul>
+    <h1>Chat</h1>
+    {{#if isChat}}
+        {{> chat}}
+    {{/if}}
+    <div class="chat-container">
+        <form id="chatForm" class="chat-form">
+            <input type="text" id="user" placeholder="Seu email" required class="chat-input"/>
+            <textarea id="message" placeholder="Sua mensagem" required class="chat-textarea"></textarea>
+            <button type="submit" class="chat-button">Enviar</button>
+        </form>
+        <ul id="messages" class="messages-list"></ul>
+    </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/chat.js"></script>
 <script>
-  const socket = io();
+    const socket = io();
 
-  document.getElementById('chatForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const user = document.getElementById('user').value;
-    const message = document.getElementById('message').value;
-    socket.emit('newMessage', { user, message });
-  });
+    document.getElementById('chatForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = document.getElementById('user').value;
+        const message = document.getElementById('message').value;
+        socket.emit('newMessage', { user, message });
+        document.getElementById('message').value = ''; // Limpa o campo de mensagem após enviar
+    });
 
-  socket.on('messageHistory', (messages) => {
-    const messagesList = document.getElementById('messages');
-    messagesList.innerHTML = messages
-      .map((msg) => `<li><strong>${msg.user}:</strong> ${msg.message}</li>`)
-      .join('');
-  });
+    socket.on('messageHistory', (messages) => {
+        const messagesList = document.getElementById('messages');
+        messagesList.innerHTML = messages
+            .map((msg) => `<li class="message-item"><strong>${msg.user}:</strong> ${msg.message}</li>`)
+            .join('');
+        messagesList.scrollTop = messagesList.scrollHeight; // Mantém a rolagem na parte inferior
+    });
 </script>
