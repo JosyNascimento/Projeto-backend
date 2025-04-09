@@ -4,18 +4,15 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-    title: { type: String, required: true, maxlength: 100 },
-    description: { type: String, required: true, maxlength: 500 },
-    price: { type: Number, required: true, min: 0 },
-    category: {
-        type: String,
-        enum: ['Electronics', 'Clothing', 'Books', 'Other'],
-        required: true,
-        index: true
-    },
-    stock: { type: Number, default: 0, min: 0 },
-    image: { type: String, match: /^https?:\/\//i }
-}, { timestamps: true });
+    title: { type: String, required: true },
+    description: String,
+    price: { type: Number, required: true },
+    code: { type: String, required: true, unique: true },
+    stock: { type: Number, default: 0 },
+    category: { type: String, required: true }, // ← esse é o que está faltando
+    thumbnail: String
+  });
+  
 
 const Product = mongoose.model("Product", productSchema);
 

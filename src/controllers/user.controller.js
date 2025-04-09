@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
+const crypto = require('crypto');
 
 async function getProfile(req, res) {
   try {
@@ -33,17 +34,38 @@ const changeRole = async (req, res) => {
 };
 // Função de registro de usuário
 const registerUser = async (req, res) => {
-  const { email, password, name } = req.body;
-
   try {
-    const newUser = new User({ email, password, name });
-    await newUser.save(); // Salva o novo usuário no banco de dados
-    res.status(201).json({ message: "Usuário registrado com sucesso!" });
+      // Extrai os dados do corpo da requisição
+      const { first_name, last_name, email, password, role, avatar } = req.body;
+
+      // Verifica se já existe um usuário com o mesmo email
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+          return res.status(400).json({ message: 'E-mail já cadastrado' });
+      }
+
+      // Cria o hash da senha
+      const hashedPassword = crypto.createHash('sha256').update(password).digest('hex'); // Use crypto.createHash
+
+      // Cria um novo usuário no banco de dados
+      const newUser = await User.create({
+          first_name,
+          last_name,
+          email,
+          password: hashedPassword,
+          role: role || "user", // Define o papel como "user" se não for fornecido
+          avatar: avatar || "public/img/sandra.jpg", // Define um avatar padrão se não for fornecido
+      });
+
+      // Retorna uma resposta de sucesso com o novo usuário
+      return res.status(201).json({ message: "Usuário cadastrado com sucesso", user: newUser });
   } catch (error) {
-    console.error("Erro ao registrar usuário:", error);
-    res.status(500).json({ error: "Erro ao registrar usuário." });
+      // Loga o erro e retorna uma resposta de erro interno do servidor
+      console.error("Erro ao registrar usuário:", error);
+      return res.status(500).json({ message: "Erro no servidor", error: error.message });
   }
 };
+
 const renderResetPasswordPage = (req, res) => {
   res.render("resetPassword", { title: "Redefinir Senha" });
 };
@@ -125,6 +147,33 @@ const adminUsers = async (req, res) => {
   }
 };
 
+// Função para buscar um usuário por ID
+const getUserById = async (req, res) => {
+  try {
+      const { id } = req.params; // Extrai o ID dos parâmetros da rota
+      const user = await User.findById(id);
+
+      if (!user) {
+          return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+
+      return res.status(200).json(user);
+  } catch (error) {
+      console.error("Erro ao buscar usuário por ID:", error);
+      return res.status(500).json({ message: "Erro ao buscar usuário.", error: error.message });
+  }
+};
+
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Erro ao buscar usuários:", error);
+    res.status(500).json({ error: "Erro ao buscar usuários." });
+  }
+};
 
 
 
@@ -139,4 +188,6 @@ module.exports = {
   deleteUser,
   adminUsers,
   changeRole,
+  getUserById,
+  getAllUsers,
 };

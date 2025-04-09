@@ -115,7 +115,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // ✅ Rotas organizadas
-app.use("/", viewRouter); 
+app.use("/view", viewRouter); 
 app.use("/api/sessions", sessionRouter);
 app.use("/", sessionRouter);
 app.use("/carts", cartRouter);

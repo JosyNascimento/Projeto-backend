@@ -2,6 +2,7 @@
 const productRepository = require('../repositories/products.repository');
 const Product = require("../models/product.model");
 
+
 // Função para listar produtos com filtros, ordenação e paginação
 const getAllProducts = async (req, res) => {
     try {
@@ -34,28 +35,12 @@ const getAllProducts = async (req, res) => {
     }
 };
 
-// Controlador para adicionar um produto
 const createProduct = async (req, res) => {
     try {
         const newProduct = await productRepository.createProduct(req.body);
         res.status(201).json(newProduct);
     } catch (error) {
         res.status(500).json({ message: 'Erro ao criar produto', error: error.message });
-    }
-};
-
-// Controlador para atualizar um produto existente
-const updateProduct = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updatedProduct = await productRepository.updateProduct(id, req.body);
-        
-        if (!updatedProduct) {
-            return res.status(404).json({ message: "Produto não encontrado" });
-        }
-        res.json(updatedProduct);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
     }
 };
 
@@ -86,6 +71,21 @@ const renderEditProduct = async (req, res) => {
         res.render("editProduct", { product });
     } catch (error) {
         res.status(500).json({ message: "Erro ao buscar produto", error: error.message });
+    }
+};
+
+// Controlador para atualizar um produto existente
+const updateProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedProduct = await productRepository.updateProduct(id, req.body);
+
+        if (!updatedProduct) {
+            return res.status(404).json({ message: "Produto não encontrado" });
+        }
+        res.json(updatedProduct);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 

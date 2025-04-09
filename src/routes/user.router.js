@@ -53,6 +53,8 @@ router.put('/premium/:uid', authMiddleware, adminMiddleware, changeRole);
 router.delete('/users/:uid', adminMiddleware, userController.deleteUser);
 router.get('/admin/users/:uid', adminMiddleware, userController.adminUsers); // Rota para adminUsers.handlebars
 router.put('/users/:uid/role', adminMiddleware, userController.changeRole);
+router.get('/users/:id', userController.getUserById);
+router.get('/users', getAllUsers);
 
 
 module.exports = router;
