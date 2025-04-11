@@ -22,6 +22,8 @@ const renderRegisterPage = (req, res) => {
     res.render("register");
 };
 
+const renderForgotPassword = (req, res) => res.render('forgot-password');
+
 const renderUpdateUserPage = async (req, res) => {
     try {
         const { id } = req.params;
@@ -39,18 +41,16 @@ const renderLoginPage = (req, res) => {
 
 
 const githubCallback = (req, res) => {
-    console.log(" Callback do GitHub chamado");
-    console.log("Dados de req.user do GitHub:", req.user);
-
+    // Lógica do callback do GitHub
     if (!req.user) {
-        console.log("❌ Usuário não autenticado via GitHub");
-        return res.status(401).json({ message: "Usuário não autenticado" });
+      return res.redirect('/login');
     }
-
     req.session.user = req.user;
     res.redirect('/profile');
-};
-
+  };
+  const loginUser = (req, res) => {
+    // Autenticação via passport
+  };
 const renderProfile = (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -126,6 +126,7 @@ module.exports = {
     renderProductsPage,
     renderRegisterPage,
     renderUpdateUserPage,
+    renderForgotPassword,
     githubCallback,
     renderCarts,
     renderProfile,

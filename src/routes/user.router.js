@@ -12,11 +12,14 @@ const methodOverride = require('method-override');
 const router = express.Router();
 
 // Rotas de registro
-router.get("/registro", (req, res) => {
-  res.render("registro");
+router.get("/register", (req, res) => {
+  res.render("register");
+});
+router.get("/registro/sucesso", (req, res) => {
+  res.render("registerSuccess", { query: req.query });
 });
 // Registrando um novo usuário
-router.post("/registro", userController.registerUser);
+router.post("/register", userController.registerUser);
 
 // Rota para obter o perfil do usuário (protege a rota com authMiddleware)
 router.get("/perfil", authorizationMiddleware.autenticacao, getProfile);
@@ -47,6 +50,8 @@ router.post(
 // Admin rotas (usando authMiddleware e adminMiddleware para garantir que o usuário é admin)
 
 router.use(methodOverride('_method'));
+router.post("/register", userController.registerUser);
+router.get("/register/success", userController.renderRegisterSuccess);
 router.get('/profile', authMiddleware, getProfile);
 router.get('/premium/:uid', authMiddleware, adminMiddleware, togglePremium);
 router.put('/premium/:uid', authMiddleware, adminMiddleware, changeRole);

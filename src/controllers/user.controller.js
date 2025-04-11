@@ -1,3 +1,5 @@
+// entregaParcial3/src/controllers/user.controller.js
+console.log("userController carregado!");
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const crypto = require('crypto');
@@ -41,9 +43,9 @@ const registerUser = async (req, res) => {
       // Verifica se já existe um usuário com o mesmo email
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-          return res.status(400).json({ message: 'E-mail já cadastrado' });
-      }
-
+        // Redireciona para o login com mensagem
+        return res.redirect("/registro/sucesso?error=email_exists");
+    }
       // Cria o hash da senha
       const hashedPassword = crypto.createHash('sha256').update(password).digest('hex'); // Use crypto.createHash
 
@@ -57,13 +59,17 @@ const registerUser = async (req, res) => {
           avatar: avatar || "public/img/sandra.jpg", // Define um avatar padrão se não for fornecido
       });
 
-      // Retorna uma resposta de sucesso com o novo usuário
-      return res.status(201).json({ message: "Usuário cadastrado com sucesso", user: newUser });
+        // Redireciona para a página de sucesso após o registro
+        return res.redirect('/registerSuccess');
   } catch (error) {
       // Loga o erro e retorna uma resposta de erro interno do servidor
       console.error("Erro ao registrar usuário:", error);
       return res.status(500).json({ message: "Erro no servidor", error: error.message });
   }
+};
+//função para renderizar a página de sucesso
+const renderRegisterSuccess = (req, res) => {
+  res.render('registerSuccess');
 };
 
 const renderResetPasswordPage = (req, res) => {
@@ -108,6 +114,11 @@ const resetPassword = async (req, res) => {
     console.error("Erro ao redefinir senha:", error);
     res.status(500).send("Erro ao redefinir senha");
   }
+};
+
+const renderForgotPassword = (req, res) => {
+  res.render('forgotPassword');
+  console.log("renderForgotPassword definido:", renderForgotPassword);
 };
 
 const togglePremium = async (req, res) => {
@@ -179,6 +190,8 @@ const getAllUsers = async (req, res) => {
 
 module.exports = {
   registerUser,
+  renderRegisterSuccess,
+  renderForgotPassword,
   renderResetPasswordPage,
   failResetPassword,
   resetPassword,

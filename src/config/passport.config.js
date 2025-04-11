@@ -6,15 +6,6 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 
 
-// Função para buscar usuário por e-mail
-const findUserByEmail = async (email) => {
-    try {
-        return await User.findOne({ email });
-    } catch (error) {
-        throw new Error(`Erro ao buscar usuário: ${error.message}`);
-    }
-};
-
 // Função para verificar senha
 const isValidPassword = (password, userPassword) => {
     return bcrypt.compareSync(password, userPassword);
@@ -76,15 +67,15 @@ passport.use('login', new LocalStrategy({ usernameField: 'email', passwordField:
     }
 ));
 
-
 // Estratégia de Login com GitHub
 passport.use('github', new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.CALLBACK_URL,
+    callbackURL: process.env.GITHUB_CALLBACK_URL,
 }, async (accessToken, refreshToken, profile, done) => {
     console.log('AccessToken:', accessToken);
     console.log('refreshToken:', refreshToken);
+    console.log("GitHubStrategy chamada.");
     try {
         console.log(profile);
         if (profile._json && profile._json.email && profile._json.name) {
@@ -95,7 +86,7 @@ passport.use('github', new GitHubStrategy({
                     last_name: profile._json.name.split(' ')[1],
                     age: profile._json.age || 18,
                     email: profile._json.email,
-                    password: "",
+                    password:  profile.id,
                 };
                 let result = await User.create(newUser);
                 return done(null, result);
@@ -106,28 +97,10 @@ passport.use('github', new GitHubStrategy({
             return done("Erro: Dados do perfil do GitHub incompletos.");
         }
     } catch (error) {
+        console.error("Erro na GitHubStrategy:", error);
         return done(`Erro ao autenticar usuário: ${error}`);
     }
 }));
-
-// Estratégia de Reset de Senha
-passport.use('reset-password', new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (username, password, done) => {
-    try {
-        const userFound = await User.findOne({ email: username });
-
-        if (!userFound) {
-            console.log("User not found");
-            return done(null, false, { message: 'Usuário não encontrado' });
-        }
-        const newPass = createHash(password);
-
-        await User.updateOne({ email: username }, { password: newPass });
-        return done(null, userFound);
-    } catch (error) {
-        return done(null, false, { message: `Erro ao alterar a password do usuário: ${error}` });
-    }
-}));
-
 // Serialização do usuário
 passport.serializeUser((user, done) => {
     done(null, user._id);
@@ -146,6 +119,25 @@ passport.deserializeUser(async (id, done) => {
         done(error);
     }
 });
+// Estratégia de Reset de Senha
+passport.use('reset-password', new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (username, password, done) => {
+    try {
+        const userFound = await User.findOne({ email: username });
+
+        if (!userFound) {
+            console.log("User not found");
+            return done(null, false, { message: 'Usuário não encontrado' });
+        }
+        const newPass = createHash(password);
+
+        await User.updateOne({ email: username }, { password: newPass });
+        return done(null, userFound);
+    } catch (error) {
+        return done(null, false, { message: `Erro ao alterar a password do usuário: ${error}` });
+    }
+}));
+
+
 
 
 module.exports = passport;

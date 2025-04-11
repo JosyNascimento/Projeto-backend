@@ -2,7 +2,7 @@ const { generateToken } = require('../utils/jwt.utils');
 const passport = require('../config/passport.config.js');
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
-
+const { githubAuth } = require("../controllers/session.controller");
 
 const githubAuth = passport.authenticate('github');
 

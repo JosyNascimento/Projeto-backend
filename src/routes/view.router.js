@@ -31,6 +31,7 @@ router.get("/", renderHomePage);
 router.get('/', authMiddleware, adminMiddleware, viewController.getAllUsers); 
 router.get("/login", renderLoginPage);
 router.get("/register", renderRegisterPage);
+router.get("/registerSuccess", userController.renderRegisterSuccess);
 router.get("/realtimeproducts", renderProductsPage);
 router.get("/chat", renderchat);
 router.get("/products", renderProductsPage);

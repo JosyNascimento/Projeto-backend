@@ -334,3 +334,15 @@ footer {
   padding: 5px;
   border-bottom: 1px solid #eee;
 }
+
+/* Estilizando o botão de login na página de sucesso (com classe personalizada) */
+.btn-purple {
+  background-color: #6f42c1 !important;
+  color: white !important;
+  border: none !important;
+}
+
+.btn-purple:hover {
+  background-color: #5a32a3 !important;
+  color: white !important;
+}

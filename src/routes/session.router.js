@@ -2,6 +2,8 @@
 const express = require('express');
 const passport = require('../config/passport.config');
 const router = express.Router();
+const { renderResetPassword } = require('./controllers/view.Controller');
+
 
 // Middleware para definir o usuário na sessão (se existir)
 router.use((req, res, next) => {
@@ -46,11 +48,38 @@ router.post('/login', (req, res, next) => {
         });
     })(req, res, next);
 });
-// Rota de login com GitHub (OAuth)
-router.get('/login/session/callback', passport.authenticate('login', { failureRedirect: '/login' }), (req, res) => {
-    console.log("✅ Login GitHub bem-sucedido:", req.user);
-    req.session.user = req.user;
-    res.redirect('/perfil');
+
+
+router.get('/githubcallback', (req, res, next) => {
+    passport.authenticate('github', { failureRedirect: '/login' }, (err, user, info) => {
+        if (err) {
+            console.error("🔥 Erro ao autenticar com GitHub:", err);
+            return res.status(500).json({ message: "Erro interno do servidor" });
+        }
+
+        if (!user) {
+            console.log("⚠️ Usuário GitHub não encontrado");
+            return res.redirect('/login');
+        }
+
+        req.logIn(user, (err) => {
+            if (err) {
+                console.error("🔥 Erro ao logar o usuário GitHub:", err);
+                return res.status(500).json({ message: "Erro ao logar o usuário" });
+            }
+
+            req.session.user = {
+                id: user._id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                email: user.email,
+                role: user.role || 'user',
+            };
+
+            console.log("✅ Sessão GitHub criada:", req.session.user);
+            res.redirect('/perfil');
+        });
+    })(req, res, next);
 });
 
 // Rota para renderizar a página de login
@@ -64,6 +93,8 @@ router.get('/faillogin', (req, res) => {
     console.log("❌ Falha na estratégia de login.");
     res.status(401).json({ message: "Usuário ou senha inválidos" });
 });
+
+router.get('/reset-password', renderResetPassword);
 
 // Rota de logout
 router.get('/logout', (req, res) => {

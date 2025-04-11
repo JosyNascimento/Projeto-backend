@@ -42,7 +42,7 @@
   .login-card button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #800080;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -50,6 +50,37 @@
   }
 
   .login-card button:hover {
-    background-color: #0056b3;
+    background-color: #800080;
   }
+/* Estilizando o botão de login na página de sucesso (com classe personalizada) */
+.custom-purple-button {
+  background-color: #800080 !important; /* Roxo */
+  border-color: #800080 !important;
+  color: white !important;
+}
+
+.custom-purple-button:hover {
+  background-color: #A020F0 !important; /* Roxo mais claro ao passar o mouse */
+  border-color: #A020F0 !important;
+}
+
+.custom-purple-button:focus {
+  box-shadow: 0 0 0 0.2rem rgba(128, 0, 128, 0.5) !important; /* Sombra de foco roxa */
+}
+
+/* Se você quiser estilizar diretamente sem a classe personalizada (menos recomendado) */
+.alert-success a.btn.btn-primary {
+  background-color: #800080 !important;
+  border-color: #800080 !important;
+  color: white !important;
+}
+
+.alert-success a.btn.btn-primary:hover {
+  background-color: #A020F0 !important;
+  border-color: #A020F0 !important;
+}
+
+.alert-success a.btn.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(128, 0, 128, 0.5) !important;
+}
 

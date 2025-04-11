@@ -1,13 +1,21 @@
 // /src/controllers/authorization.controller.js
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const passport = require("passport");
+const passport = require('../config/passport.config.js');
+
+
+// src/controllers/authorization.controller.js
+const getGithubAuth = () => {
+  console.log("getGithubAuth foi chamado");
+  const middleware = passport.authenticate('github');
+  console.log("Middleware retornado:", middleware);
+  return middleware;
+};
 
 const renderLoginPage = (req, res) => {
   res.render("profile");
 };
 
-const githubAuth = passport.authenticate("github", { scope: ["user:email"] });
 
 const githubCallback = passport.authenticate("github", {
   failureRedirect: "/login",
@@ -140,8 +148,8 @@ module.exports = {
   renderLoginPage,
   forgotPassword,
   resetPassword, 
-  githubAuth,
   githubCallback,
+  getGithubAuth,
   handleGithubCallback,
   loginUser,
   failLogin,
