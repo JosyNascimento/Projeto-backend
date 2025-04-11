@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { renderRegister, renderForgotPassword } = require('../controllers/viewController');
+const { renderRegister, renderForgotPassword } = require('../controllers/view.controller');
 const {  renderLoginPage, 
   loginUser, 
   githubAuth, 
