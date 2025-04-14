@@ -1,15 +1,16 @@
+// entregaParcial3/src/controllers/session.controller.js
 const { generateToken } = require('../utils/jwt.utils');
 const passport = require('../config/passport.config.js');
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const { githubAuth } = require("../controllers/session.controller");
 
-const githubAuth = passport.authenticate('github');
+
 
 const githubCallback = (req, res) => {
     console.log("Dados de req.user do GitHub:", req.user);
     req.session.user = req.user;
-    res.redirect('/profile'); // Correção aqui
+    res.redirect('/profile'); 
 };
 
 const loginUser = async (req, res) => {
@@ -51,8 +52,8 @@ const loginUser = async (req, res) => {
 };
 
 const failLogin = (req, res) => {
-    console.log("Falha no login - usuário ou senha inválidos");
-    res.redirect('/login?message=Usuário ou senha inválidos');
+    console.log("Falha no login - Credenciais inválidas");
+    res.redirect('/login?message=Credenciais inválidas');
 };
 
 const logoutUser = async (req, res, next) => {
@@ -64,8 +65,7 @@ const logoutUser = async (req, res, next) => {
     });
 };
 
-module.exports = {
-    
+module.exports = {  
     githubAuth,
     githubCallback,
     loginUser,

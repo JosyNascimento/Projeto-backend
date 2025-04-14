@@ -1,5 +1,5 @@
 
-      <h1>Carrinho de Compras</h1>
+      <h1>Meu Carrinho</h1>
       <h2>Itens no Carrinho</h2>
   
  {{#if cart.items.length}}
@@ -16,7 +16,7 @@
         </tr>
       </thead>
       <tbody>
-        {{#each cart.items}}
+        {{#each cart.products}}
           <tr>
             <td>
               <img src="{{this.productId.imageUrl}}" alt="{{this.productId.name}}" width="100">
@@ -35,5 +35,5 @@
     </div>
   {{else}}
     <p>Seu carrinho está vazio.</p>
-    <a href="/products">Continue Shopping</a>
+    <a href="/products">Continuar comprando</a>
   {{/if}}

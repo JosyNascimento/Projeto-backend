@@ -89,6 +89,36 @@ const updateProduct = async (req, res) => {
     }
 };
 
+const renderProductsPage = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect("/login");
+        }
+  
+        const role = req.session.user.role;
+        const username = req.session.user.email;
+        const userId = req.session.user.id; // Obtenha o ID do usuário da sessão
+  
+        // Busque os produtos do banco de dados
+        const products = await Product.find().lean();
+  
+        // Passa o role do usuario para a view
+        const isAdminOrPremium = role === "admin" || role === "premium";
+  
+        res.render("products", {
+            username,
+            role,
+            user: req.session.user, // Passa o objeto do usuário para a view
+            products: products, // Passa os produtos para a view
+            isAdminOrPremium: isAdminOrPremium, // Passa a flag para a view
+            userId: userId // Passa o ID do usuário para a view
+        });
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        res.status(500).send('Erro ao carregar produtos');
+    }
+  };
+
 module.exports = {
     getAllProducts,
     createProduct,
@@ -96,4 +126,5 @@ module.exports = {
     deleteProduct,
     renderAddProduct,
     renderEditProduct,
+    renderProductsPage,
 };

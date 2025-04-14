@@ -1,6 +1,8 @@
 // controllers/chat.controller.js
 const Message = require('../models/message.model'); // Importe o modelo Message
 
+const renderchat = (req, res) => res.render('chat'); // Mantenha apenas esta declaração
+
 const sendMessage = async (req, res) => {
     try {
         const { message } = req.body;
@@ -28,4 +30,7 @@ const sendMessage = async (req, res) => {
     }
 };
 
-module.exports = { sendMessage };
+module.exports = {
+    sendMessage,
+    renderchat,
+};

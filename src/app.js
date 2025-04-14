@@ -3,6 +3,7 @@ const express = require("express");
 const http = require("http");
 const jwtSecret = process.env.JWT_SECRET || "Coder";
 const handlebars = require("express-handlebars");
+const handlebarsUtils = require('./utils/handlebars.utils');
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -78,7 +79,8 @@ app.engine(
           },
           ifEquals: function (arg1, arg2, options) {
               return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
-          }
+          },
+          multiply: handlebarsUtils.helpers.multiply, // Adicionado o helper multiply aqui
       },
   })
 );

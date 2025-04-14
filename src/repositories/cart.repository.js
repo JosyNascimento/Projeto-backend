@@ -1,3 +1,4 @@
+// entregaParcial3/src/repositories/cart.repository.js
 const Cart = require('../models/cart.model');
 const Product = require('../models/product.model');
 
@@ -149,4 +150,4 @@ class CartRepository {
     }
 }
 
-module.exports = new CartRepository();
+module.exports =  CartRepository;

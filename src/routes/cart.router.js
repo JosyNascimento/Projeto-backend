@@ -22,6 +22,7 @@ router.put(
   authorizationMiddleware("user"),
   updateCartProductQuantity
 );
+//router.get("/cart", viewController.renderCarts);
 router.get("/", displayCart);
 router.delete("/:cid", clearCart);
 // Rota para realizar a compra e gerar o ticket

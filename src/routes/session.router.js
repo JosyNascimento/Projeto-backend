@@ -2,8 +2,7 @@
 const express = require('express');
 const passport = require('../config/passport.config');
 const router = express.Router();
-const { renderResetPassword } = require('./controllers/view.Controller');
-
+const { renderResetPassword } = require('../controllers/view.controller'); // Corrigido aqui
 
 // Middleware para definir o usuário na sessão (se existir)
 router.use((req, res, next) => {
@@ -48,7 +47,6 @@ router.post('/login', (req, res, next) => {
         });
     })(req, res, next);
 });
-
 
 router.get('/githubcallback', (req, res, next) => {
     passport.authenticate('github', { failureRedirect: '/login' }, (err, user, info) => {

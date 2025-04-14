@@ -6,23 +6,13 @@ const userController = require("../controllers/user.controller");
 const User = require('../models/user.model');
 const { getProfile, togglePremium, changeRole, getAllUsers, renderResetPasswordPage, failResetPassword, resetPassword } = require('../controllers/user.controller'); // Importação única
 const adminMiddleware = require('../middlewares/admin.middleware');
-const { authMiddleware} = require('../middlewares/auth.middleware');
+const { autenticacao, authMiddleware, isAdmin} = require('../middlewares/auth.middleware'); // Importe autenticacao corretamente
 const methodOverride = require('method-override');
 
 const router = express.Router();
 
-// Rotas de registro
-router.get("/register", (req, res) => {
-  res.render("register");
-});
-router.get("/registro/sucesso", (req, res) => {
-  res.render("registerSuccess", { query: req.query });
-});
-// Registrando um novo usuário
-router.post("/register", userController.registerUser);
 
-// Rota para obter o perfil do usuário (protege a rota com authMiddleware)
-router.get("/perfil", authorizationMiddleware.autenticacao, getProfile);
+
 
 // Deletar usuário
 router.delete('/user/:email', async (req, res) => {
@@ -36,30 +26,21 @@ router.delete('/user/:email', async (req, res) => {
   }
 });
 
-// Rotas para redefinição de senha
-router.get("/reset-password", renderResetPasswordPage);
-router.get("/failreset", failResetPassword);
-router.post(
-  "/reset-password",
-  passport.authenticate("reset-password", {
-    failureRedirect: "/failreset",
-    failureMessage: true,
-  }),
-  resetPassword
-);
 // Admin rotas (usando authMiddleware e adminMiddleware para garantir que o usuário é admin)
 
-router.use(methodOverride('_method'));
-router.post("/register", userController.registerUser);
-router.get("/register/success", userController.renderRegisterSuccess);
-router.get('/profile', authMiddleware, getProfile);
+// GET perfil do usuário logado
+router.get("/perfil", authMiddleware, getProfile);
+
+// Alterações e exclusões (usuário/admin)
 router.get('/premium/:uid', authMiddleware, adminMiddleware, togglePremium);
 router.put('/premium/:uid', authMiddleware, adminMiddleware, changeRole);
 router.delete('/users/:uid', adminMiddleware, userController.deleteUser);
-router.get('/admin/users/:uid', adminMiddleware, userController.adminUsers); // Rota para adminUsers.handlebars
+router.get('/admin/users/:uid', adminMiddleware, userController.adminUsers);
 router.put('/users/:uid/role', adminMiddleware, userController.changeRole);
 router.get('/users/:id', userController.getUserById);
 router.get('/users', getAllUsers);
+router.get('/list', autenticacao, isAdmin, userController.renderUserList);
+
 
 
 module.exports = router;

@@ -72,55 +72,6 @@ const renderRegisterSuccess = (req, res) => {
   res.render('registerSuccess');
 };
 
-const renderResetPasswordPage = (req, res) => {
-  res.render("resetPassword", { title: "Redefinir Senha" });
-};
-
-const failResetPassword = (req, res) => {
-  res.status(400).render("error", {
-    message: "Erro ao tentar redefinir a senha. Por favor, tente novamente.",
-    title: "Erro",
-  });
-};
-
-const resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body; // O token será enviado no corpo da requisição junto com a nova senha
-
-  try {
-    // Verificar se o token de redefinição de senha é válido
-    const tokenRecord = await resetPasswordTokenModel.findOne({ token });
-    if (!tokenRecord) {
-      return res.status(400).send("Token inválido ou expirado");
-    }
-
-    // Encontre o usuário associado ao token
-    const user = await User.findById(tokenRecord.userId);
-    if (!user) {
-      return res.status(404).send("Usuário não encontrado");
-    }
-
-    // Hash a nova senha
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Atualizar a senha do usuário
-    user.password = hashedPassword;
-    await user.save();
-
-    // Remover o token de redefinição, já que a senha foi alterada
-    await resetPasswordTokenModel.deleteOne({ token });
-
-    res.send("Senha alterada com sucesso");
-  } catch (error) {
-    console.error("Erro ao redefinir senha:", error);
-    res.status(500).send("Erro ao redefinir senha");
-  }
-};
-
-const renderForgotPassword = (req, res) => {
-  res.render('forgotPassword');
-  console.log("renderForgotPassword definido:", renderForgotPassword);
-};
-
 const togglePremium = async (req, res) => {
   try {
     const { uid } = req.params;
@@ -175,26 +126,43 @@ const getUserById = async (req, res) => {
   }
 };
 
-
 const getAllUsers = async (req, res) => {
+  console.log("getAllUsers chamado!");
   try {
-    const users = await User.find({});
-    res.status(200).json(users);
+      const users = await User.find().lean();
+      const user = req.user;
+      res.render("adminUsers", { users, title: "Lista de Usuários", user });
   } catch (error) {
-    console.error("Erro ao buscar usuários:", error);
-    res.status(500).json({ error: "Erro ao buscar usuários." });
+      res.status(500).send("Erro ao buscar lista de usuários");
   }
 };
 
+const renderUserList = async (req, res) => {
+  console.log("renderUserList chamado!");
+  console.log("req.user:", req.user);
+  try {
+      let users = await User.find();
+      users = users.map((user) => user.toJSON());
+      console.log("Usuários encontrados:", users);
+
+      return res.render("userList", {
+          users,
+          user: req.user, // ✅ Passando o usuário para a view
+          isAdmin: req.user && req.user.role === "admin",
+      });
+  } catch (error) {
+      console.error("Erro em renderUserList:", error);
+      return res.status(500).render("error", {
+          message: "Erro ao buscar lista de usuários.",
+          error: error.message,
+      });
+  }
+};
 
 
 module.exports = {
   registerUser,
   renderRegisterSuccess,
-  renderForgotPassword,
-  renderResetPasswordPage,
-  failResetPassword,
-  resetPassword,
   getProfile,
   togglePremium,
   changeRole,
@@ -203,4 +171,5 @@ module.exports = {
   changeRole,
   getUserById,
   getAllUsers,
+  renderUserList,
 };
