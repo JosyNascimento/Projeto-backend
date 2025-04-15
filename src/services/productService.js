@@ -1,21 +1,35 @@
-// Desafio10/src/services/productService.js
+/src/services/productService.js
 
 const Product = require("../dao/models/product.model"); // importando o modelo de produtos
 
 // Função para obter todos os produtos
 const getProducts = async () => {
-  return await Product.find();
+  try {
+      return await Product.find();
+  } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+      throw error; // Propaga o erro para o chamador
+  }
 };
 
 // Função para adicionar um novo produto
 const addProduct = async (product) => {
-  return await Product.create(product);
+  try {
+      return await Product.create(product);
+  } catch (error) {
+      console.error("Erro ao adicionar produto:", error);
+      throw error;
+  }
 };
 
 // Função para excluir um produto pelo ID
 const deleteProduct = async (productId) => {
-  return await Product.findByIdAndDelete(productId);
+  try {
+      return await Product.findByIdAndDelete(productId);
+  } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+      throw error;
+  }
 };
-
 // Exportando os métodos para uso em outros arquivos
 module.exports = { getProducts, addProduct, deleteProduct };

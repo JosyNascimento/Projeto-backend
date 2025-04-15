@@ -1,5 +1,4 @@
 // entregaParcial3/src/controllers/ticket.controller.js
-const TicketDAO = require('../dao/ticket.dao');
 const CartDAO = require('../dao/cart.dao'); //
 const ticketRepository = require('../repositories/ticket.repository');
 const { validationResult } = require('express-validator');
@@ -23,8 +22,7 @@ const createTicket = async (req, res) => {
 
         const products = cart.products;
 
-        const ticket = await TicketDAO.createTicket(userId, products);
-
+        const ticket = await ticketRepository.createTicket(userId, products);
         await CartDAO.clearCart(cid);
 
         return res.status(201).json({ message: 'Compra realizada com sucesso', ticket });
@@ -38,7 +36,7 @@ const createTicket = async (req, res) => {
 const getTicketById = async (req, res) => {
     try {
         const { ticketId } = req.params;
-        const ticket = await TicketDAO.getTicketById(ticketId);
+        const ticket = await ticketRepository.getTicketById(ticketId);
         return res.status(200).json(ticket);
     } catch (error) {
         console.error('Erro ao buscar ticket:', error);
@@ -58,10 +56,23 @@ const getTicketsByUserId = async (req, res) => {
     }
 };
 
+const updateTicket = async (req, res) => {
+    try {
+        const { ticketId, ticketData } = req.body // REQUEST: { ticketId: 21, ticketData: {...} }
+        const updatedTicket = await ticketRepository.updateTicket(ticketId, ticketData)
+        
+        return res.status(200).json(updatedTicket)
+    } catch (error) {
+        return res.status(500).json({ message: 'Erro ao atualizar ticket do usuário' });
+    }
+}
 
+// TODO: fazer próximos controllers com base no repository
 
 module.exports = {
     createTicket,
     getTicketById,
-    getTicketsByUserId
+    getTicketsByUserId,
+    getTicketsByUserId,
+    updateTicket,
 };

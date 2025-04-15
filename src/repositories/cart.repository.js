@@ -12,8 +12,19 @@ class CartRepository {
         }
     }
 
+    async getCartByUserId(userId) {
+        try {
+            const res = await Cart.findOne({ userId })
+            console.log('---RESPONSE AQUI---\n', res)
+            console.log('---USER ID---\n', userId)
+            return
+        } catch (error) {
+            throw error;
+        }
+    }
     async createCart(cartData) {
         try {
+             // TODO: verificar se já existe um carrinho antes de criar um novo
             return await Cart.create(cartData);
         } catch (error) {
             console.error('Erro ao criar carrinho:', error);
@@ -150,4 +161,4 @@ class CartRepository {
     }
 }
 
-module.exports =  CartRepository;
+module.exports = CartRepository;

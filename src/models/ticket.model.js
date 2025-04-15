@@ -11,7 +11,7 @@ const ticketSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    default: generateUniqueCode, // Usa a função generateUniqueCode como valor padrão
+    default: generateUniqueCode(),  // Usa a função generateUniqueCode como valor padrão
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,

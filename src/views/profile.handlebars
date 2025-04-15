@@ -16,11 +16,21 @@
         </div>
 
         <div class="profile-btn-container">
-            <a href="/logout" class="logout-btn">Logout</a>
+            
+            <a href="/logout" id="logout-link">Logout</a>
         </div>
     </div>
 </div>
-
+<script>
+    document.getElementById('logout-link').addEventListener('click', function(event) {
+        event.preventDefault(); // Impede o comportamento padrão do link
+        if (confirm('Deseja realmente sair?')) {
+            window.location.href = '/logout'; // Redireciona para a rota de logout
+            alert('Logout com sucesso!'); // Exibe a mensagem de sucesso
+            window.location.href = '/login'; // Redireciona para a página de login após o alerta
+        }
+    });
+</script>
 
 <style>
     .profile-container {
@@ -48,7 +58,7 @@
         align-items: center;
     }
 
-    .logout-btn {
+    .logout-link {
         width: 80%;
         padding: 10px;
         background-color: #360a1f;
@@ -62,7 +72,7 @@
         margin-top: 10px;
     }
 
-    .logout-btn:hover {
+    .logout-link:hover {
         background-color: #a807a3;
     }
 </style>

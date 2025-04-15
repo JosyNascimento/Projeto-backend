@@ -1,3 +1,4 @@
+// routes/auth.router.js
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -8,9 +9,7 @@ const {
 } = require("../controllers/user.controller");
 
 const {
-  renderLoginPage,
   failResetPassword,
-  loginUser,
   renderResetPasswordPage,
   handleGithubCallback,
   resetPassword,
@@ -18,19 +17,20 @@ const {
   renderForgotPassword,
 } = require("../controllers/auth.controller");
 
-router.get("/githubcallback/success", handleGithubCallback);
-
-router.use((req, res, next) => {
-  if (req.session.user) {
-    res.locals.user = req.session.user;
-  }
-  next();
+// Rota de início do login com GitHub
+router.get("/github",passport.authenticate("github", { scope: ["user:email"] })
+);
+router.get('/githubcallback', passport.authenticate('github', {
+  failureRedirect: '/login',
+}), (req, res, next) => {
+  handleGithubCallback(req, res, next);
 });
 
 // Rotas de autenticação e registro
-router.get("/forgot-password-success", (req, res) => {
-  res.render("forgotPasswordSuccess");
+router.get("/forgot-password", (req, res) => {
+  res.render("forgotPassword");
 });
+router.post("/forgot-password", forgotPassword);
 router.post("/register", registerUser);
 router.get("/register/success", renderRegisterSuccess);
 

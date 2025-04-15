@@ -1,9 +1,13 @@
 const Ticket = require('../models/ticket.model');
-
+const TicketDAO = require('../dao/ticket.dao');
 class TicketRepository {
-    async createTicket(ticketData) {
+    constructor() {
+        this.ticketDAO = new TicketDAO()
+    }
+
+    async createTicket(userId, products) {
         try {
-            return await Ticket.create(ticketData);
+            return await this.ticketDAO.createTicket(userId, products);
         } catch (error) {
             console.error('Erro ao criar ticket:', error);
             throw error;
@@ -12,7 +16,7 @@ class TicketRepository {
 
     async getTicketById(ticketId) {
         try {
-            return await Ticket.findById(ticketId);
+            this.ticketDAO.getTicketById(ticketId);
         } catch (error) {
             console.error('Erro ao buscar ticket por ID:', error);
             throw error;
@@ -30,7 +34,7 @@ class TicketRepository {
 
     async updateTicket(ticketId, ticketData) {
         try {
-            return await Ticket.findByIdAndUpdate(ticketId, ticketData, { new: true });
+            return await this.ticketDAO.updateTicket(ticketId, ticketData);
         } catch (error) {
             console.error('Erro ao atualizar ticket:', error);
             throw error;
@@ -39,7 +43,7 @@ class TicketRepository {
 
     async deleteTicket(ticketId) {
         try {
-            return await Ticket.findByIdAndDelete(ticketId);
+            this.ticketDAO.deleteTicket(ticketId);
         } catch (error) {
             console.error('Erro ao deletar ticket:', error);
             throw error;

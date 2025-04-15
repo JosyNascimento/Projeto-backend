@@ -1,19 +1,21 @@
 // /src/controllers/authorization.controller.js
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { generateToken } = require('../utils/jwt.utils');
 const passport = require("../config/passport.config.js");
 const User = require("../models/user.model.js");
 const crypto = require("crypto");
+
+
+const renderLoginPage = (req, res) => {
+  res.render("profile");
+};
 
 const getGithubAuth = () => {
   console.log("getGithubAuth foi chamado");
   const middleware = passport.authenticate("github");
   console.log("Middleware retornado:", middleware);
   return middleware;
-};
-
-const renderLoginPage = (req, res) => {
-  res.render("profile");
 };
 
 const githubCallback = passport.authenticate("github", {
@@ -27,34 +29,42 @@ const handleGithubCallback = (req, res) => {
 };
 
 // Login via formulário
-const loginUser = (req, res, next) => {
-  console.log("Tentativa de login:");
-  passport.authenticate("login", (err, user, info) => {
-    if (err) return next(err);
-    if (!user)
-      return res.status(401).json({ message: "Usuário ou senha inválidos" });
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        console.log("Tentativa de login:", email);
 
-    req.logIn(user, (err) => {
-      if (err) return next(err);
+        const user = await User.findOne({ email });
 
-      const token = jwt.sign(
-        { id: req.user._id, role: req.user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-      console.log("Token gerado:", token);
+        if (!user) {
+            console.log("Usuário não encontrado:", email);
+            return res.status(400).json({ message: "Usuário não encontrado" });
+        }
 
-      res.json({
-        message: "Login bem-sucedido",
-        token: token, // Correção: envia o token gerado
-        user: {
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-        },
-      });
-    });
-  })(req, res, next);
+        const isValid = await user.comparePassword(password);
+        if (!isValid) {
+            console.log("Senha inválida:", email);
+            return res.status(400).json({ message: "Senha inválida" });
+        }
+
+        const token = generateToken({ id: user._id, role: user.role, email: user.email });
+
+        req.session.user = {
+            id: user._id,
+            first_name: user.first_name || "Nome não disponível",
+            last_name: user.last_name,
+            email: user.email,
+            role: user.role,
+        };
+
+        console.log("🟢 Login bem-sucedido:", req.session.user);
+
+        res.cookie('token', token, { httpOnly: true });
+        res.redirect('/profile');
+    } catch (error) {
+        console.error("Erro ao fazer login:", error);
+        res.status(500).json({ message: "Erro interno no servidor" });
+    }
 };
 
 const renderResetPasswordPage = (req, res) => {

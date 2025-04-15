@@ -1,16 +1,27 @@
-//entregaParcial3/src/controllers/cart.controller.js
-const cartRepository = require('../repositories/cart.repository');
+// entregaParcial3/src/controllers/cart.controller.js
+const CartRepository = require('../repositories/cart.repository');
+const cartRepository = new CartRepository()
 const Cart = require('../models/cart.model');
+
 const createCart = async (req, res) => {
     try {
-        const userEmail = req.body.email;  // Exemplo de e-mail enviado na requisição
+        const userEmail = req.user.email; // Exemplo de e-mail enviado na requisição
+        const { productId, quantity } = req.body;
+
         const newCart = await cartRepository.createCart({ purchaserEmail: userEmail });
+
+        req.session.cartId = newCart._id
+
+        if (productId && quantity) {
+            await cartRepository.addProductToCart(newCart._id, productId, quantity);
+        }
         return res.status(201).json(newCart);
-    } catch (error) {
+    } 
+    catch (error) {
         return res.status(500).json({ error: error.message });
     }
-};
 
+};
 const getCartById = async (req, res) => {
     try {
         const cart = await cartRepository.getCartById(req.params.cid);
@@ -22,17 +33,32 @@ const getCartById = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
-
-const addProductToCart = async (req, res) => {
-    const { productId, quantity } = req.body;
+const getCart = async (req, res) => {
     try {
-        await cartRepository.addProductToCart(req.session.cartId, productId, quantity);
-        res.redirect("/cart");
+        const cart = await Cart.findOne({ userId: req.body.userId }).populate(
+            'products.productId'
+        );
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Carrinho não encontrado' });
+        }
+
+        return res.status(200).json(cart);
     } catch (error) {
-        console.error("Erro ao adicionar ao carrinho:", error);
-        res.status(500).send("Erro ao adicionar ao carrinho");
+        console.error('Erro ao buscar carrinho:', error);
+        return res.status(500).json({ message: 'Erro interno do servidor' });
     }
 };
+const addProductToCart = async (req, res) => {
+    try {
+        await cartRepository.addProductToCart(req.session.cartId, req.body.productId, req.body.quantity);
+        res.redirect('/cart'); // Redirecionamento para a página do carrinho
+    } catch (error) {
+        console.error('Erro ao adicionar ao carrinho:', error);
+        res.status(500).send('Erro ao adicionar ao carrinho');
+    }
+};
+
 
 const updateCartProductQuantity = async (req, res) => {
     const { cid, pid } = req.params;
@@ -79,31 +105,31 @@ const renderCarts = async (req, res) => {
         if (!req.session.user) {
             return res.redirect('/login');
         }
-  
+
         const userId = req.session.user.id;
-        // Assumindo que você tem um campo userId no seu modelo Cart
-        const cart = await Cart.findOne({ userId }).populate('products.product');
-  
+        const cart = await cartRepository.getCartByUserId(userId);
+
         if (cart) {
-            // Calcular os totais aqui usando os dados do carrinho
             const { totalQuantity, totalPrice } = await cartRepository.calculateCartTotals(cart._id);
-  
+            console.log("Dados do carrinho:", cart, totalQuantity, totalPrice); // Adicione este log
             res.render('cart', { title: 'Carrinho', cart, totalQuantity, totalPrice });
         } else {
+            console.log("Carrinho vazio"); // Adicione este log
             res.render('cart', { title: 'Carrinho', cart: { products: [] }, totalQuantity: 0, totalPrice: 0 });
         }
     } catch (error) {
         console.error('Erro ao renderizar carrinho:', error);
         res.status(500).send('Erro ao carregar carrinho');
     }
-  };
+};
 
 module.exports = {
     createCart,
     getCartById,
+    getCart,
+    renderCarts,
     addProductToCart,
     updateCartProductQuantity,
     displayCart,
     clearCart,
-    renderCarts,
 };

@@ -1,9 +1,6 @@
 // src/controllers/view.controller.js
 const userModel = require("../models/user.model");
 const jwt = require('jsonwebtoken');
-
-
-
 console.log("view.controller carregado!");
 
 const renderHomePage = (req, res) => {
@@ -62,14 +59,10 @@ const renderProfile = (req, res) => {
 // Adicionando a função renderResetPassword
 const renderResetPassword = (req, res) => {
     console.log("renderResetPassword chamado!");
-    res.render('reset-password'); // Certifique-se de que 'reset-password' existe
-};
-// Definição da função UserList
+    res.render('reset-password'); 
+  };
 
-
-
-
-
+  
 
 module.exports = {
     renderHomePage,

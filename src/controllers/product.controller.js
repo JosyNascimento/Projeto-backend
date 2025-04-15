@@ -1,5 +1,6 @@
 // src/controllers/product.controller.js
 const productRepository = require('../repositories/products.repository');
+
 const Product = require("../models/product.model");
 
 
@@ -31,7 +32,8 @@ const getAllProducts = async (req, res) => {
             page: Number(page),
         });
     } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
+        console.error('Erro ao buscar produtos:', error);
+        res.status(500).send('Erro ao buscar produtos.');
     }
 };
 
