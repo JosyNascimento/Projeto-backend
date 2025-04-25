@@ -1,5 +1,13 @@
 // entregaParcial3/src/dao/product.dao.js
-const Product = require('../models/product.model');
+const Product = require('../dao/models/product.model');
+
+
+
+const renderHome = async (req, res) => {
+  const products = await Product.find();
+  const cartId = req.session.user.cart; 
+  res.render('home', { products, cartId });
+};
 
 const getAllProducts = async (req, res) => {
     try {

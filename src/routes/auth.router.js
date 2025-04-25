@@ -15,21 +15,26 @@ const {
   resetPassword,
   forgotPassword,
   renderForgotPassword,
+  logoutUser,
 } = require("../controllers/auth.controller");
 
 // Rota de início do login com GitHub
-router.get("/github",passport.authenticate("github", { scope: ["user:email"] })
+router.get(
+  '/githubcallback', 
+  (req, res, next) => {
+    console.log("🔁 Callback GitHub - código recebido:", req.query.code);
+    next();
+  },
+  passport.authenticate('github', {
+    failureRedirect: '/login',
+  }),
+  (req, res) => {
+    console.log("✅ GitHub login bem-sucedido! Usuário:", req.user);
+    res.redirect('/perfil'); 
+  }
 );
-router.get('/githubcallback', passport.authenticate('github', {
-  failureRedirect: '/login',
-}), (req, res, next) => {
-  handleGithubCallback(req, res, next);
-});
 
 // Rotas de autenticação e registro
-router.get("/forgot-password", (req, res) => {
-  res.render("forgotPassword");
-});
 router.post("/forgot-password", forgotPassword);
 router.post("/register", registerUser);
 router.get("/register/success", renderRegisterSuccess);
@@ -37,16 +42,7 @@ router.get("/register/success", renderRegisterSuccess);
 // Rotas para redefinir senha
 router.get("/forgot-password", renderForgotPassword);
 router.get("/reset-password", renderResetPasswordPage);
-router.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (!err) {
-      res.clearCookie("token");
-      res.redirect("/login");
-    } else {
-      res.status(500).json({ message: "Erro no logout", error: err });
-    }
-  });
-});
+router.get("/logout", logoutUser);
 router.get("/failreset", failResetPassword);
 router.post(
   "/reset-password",

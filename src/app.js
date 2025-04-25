@@ -3,29 +3,34 @@ const express = require("express");
 const http = require("http");
 const jwtSecret = process.env.JWT_SECRET || "Coder";
 const handlebars = require("express-handlebars");
-const handlebarsUtils = require('./utils/handlebars.utils');
+const handlebarsUtils = require("./utils/handlebars.utils");
 const path = require("path");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
-const Message = require("./models/message.model");
-const productRouter = require("./routes/product.router");
+const chatRouter = require("./routes/chat.router");
+
+const Message = require("./models/chat.model");
+const productsApiRouter = require("./routes/api/apiProduct.router");
+const productRouter = require("./routes/products.router");
 const passport = require("./config/passport.config");
 const mongoStore = require("connect-mongo");
 const viewRouter = require("./routes/view.router");
 const testRouter = require("./routes/test.router");
-const chatRouter = require("./routes/chat.router");
 const userRouter = require("./routes/user.router");
 const cartRouter = require("./routes/cart.router");
 const authRouter = require("./routes/auth.router");
+const setupWebSocket = require("./websocket/websocket");
 const sessionRouter = require("./routes/session.router");
 const { autenticacao } = require("./middlewares/auth.middleware");
 const session = require("express-session");
 const connectDB = require("./config/connectDB");
-const methodOverride = require("method-override"); 
+const methodOverride = require("method-override");
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-
+const seedRouter = require("./routes/seed.router");
+const checkoutRouter = require("./routes/checkout.router");
 
 // Conectar ao banco de dados
 connectDB();
@@ -35,53 +40,40 @@ const server = http.createServer(app);
 // 🔥 Socket.IO com CORS habilitado
 const io = new Server(server, {
   cors: {
-      origin: "http://localhost:8080", // ou "*" para liberar geral
-      methods: ["GET", "POST"]
-  }
+    origin: "http://localhost:8080", // ou "*" para liberar geral
+    methods: ["GET", "POST"],
+  },
 });
 
 // Disponibiliza o io para os controllers acessarem
 app.set("io", io);
-
+app.set("view engine", "handlebars");
 // Configuração do WebSocket
-io.on("connection", async (socket) => {
-  console.log("🟢 Um usuário se conectou!");
-  // Exemplo: histórico ou mensagem ao conectar
-  socket.emit("messageHistory", []); // Pode enviar mensagens salvas do banco aqui
+setupWebSocket(io); // Chama setupWebSocket UMA VEZ aqui
 
-  socket.on("newMessage", async (msg) => {
-    try {
-      await Message.create({ user: msg.user, message: msg.message });
-      io.emit("newMessage", msg);
-    } catch (error) {
-      console.error("Erro ao salvar mensagem:", error);
-    }
-  });
-  
-});
 // ✅ Configuração do Handlebars
 app.engine(
   "handlebars",
   handlebars.engine({
-      runtimeOptions: {
-          allowProtoPropertiesByDefault: true,
-          allowProtoMethodsByDefault: true,
+    runtimeOptions: {
+      allowProtoPropertiesByDefault: true,
+      allowProtoMethodsByDefault: true,
+    },
+    helpers: {
+      or: function (a, b) {
+        return a || b;
       },
-      helpers: {
-          or: function (a, b) {
-              return a || b;
-          },
-          eq: function (a, b) {
-              return a === b;
-          },
-          isAdmin: function (user) {
-              return user && user.role === "admin";
-          },
-          ifEquals: function (arg1, arg2, options) {
-              return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
-          },
-          multiply: handlebarsUtils.helpers.multiply, // Adicionado o helper multiply aqui
+      eq: function (a, b) {
+        return a === b;
       },
+      isAdmin: function (user) {
+        return user && user.role === "admin";
+      },
+      ifEquals: function (arg1, arg2, options) {
+        return arg1 == arg2 ? options.fn(this) : options.inverse(this);
+      },
+      multiply: handlebarsUtils.helpers.multiply,
+    },
   })
 );
 app.set("view engine", "handlebars");
@@ -89,11 +81,13 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(methodOverride("_method"));
 app.use(cookieParser());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
-
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+  });
 // ✅ Configuração do Session
 app.use(
   session({
@@ -105,8 +99,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: { secure: process.env.NODE_ENV === "production" },
-  }),
-  
+  })
 );
 
 app.use(passport.initialize());
@@ -118,16 +111,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // ✅ Rotas organizadas
-app.use("/view", viewRouter); 
+app.use("/view", viewRouter);
 app.use("/api/sessions", sessionRouter);
+app.use("/api/products", productsApiRouter);
+app.use("/", seedRouter);
 app.use("/", sessionRouter);
 app.use("/", authRouter);
-app.use("/cart", cartRouter);
-app.use("/products", productRouter);
 app.use("/", viewRouter);
 app.use("/", userRouter);
-app.use("/chat", chatRouter);
+app.use("/", chatRouter);
+app.use("/cart", cartRouter);
+app.use("/products", productRouter);
+app.use("/addProduct", productRouter); // Use productRouter para consistência
+app.use("/deleteProduct", productRouter); // Use productRouter para consistência
 app.use("/test", testRouter);
+app.use("/checkout", checkoutRouter);
 
 // Swagger setup
 const swaggerOptions = {
@@ -143,17 +141,22 @@ const swaggerOptions = {
 const specs = swaggerJSDoc(swaggerOptions);
 app.use("/apidocs", swaggerUi.serve, swaggerUi.setup(specs));
 
+app.get('/realtimeproducts', (req, res) => {
+    res.render('realtimeproducts', { title: 'Realtime Products' });
+  });
+  
 // Middleware de erro global
 app.use((err, req, res, next) => {
-  // Trate erros globais aqui
-  res.status(500).json({ message: "Erro interno do servidor" });
-});
+    console.error(err); // Log the error to the console
+    res.status(500).json({ message: "Erro interno do servidor", error: err.message });
+  });
 
 app.use((err, req, res, next) => {
   console.error("🔥 ERRO DETECTADO:", err.stack || err);
-  res.status(500).json({ message: "Erro interno do servidor", error: err.message });
+  res
+    .status(500)
+    .json({ message: "Erro interno do servidor", error: err.message });
 });
-
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

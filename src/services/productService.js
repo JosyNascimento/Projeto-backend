@@ -1,6 +1,6 @@
-/src/services/productService.js
+//src/services/productService.js
 
-const Product = require("../dao/models/product.model"); // importando o modelo de produtos
+const Product = require("../models/product.model"); // importando o modelo de produtos
 
 // Função para obter todos os produtos
 const getProducts = async () => {

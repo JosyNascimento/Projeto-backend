@@ -1,19 +1,24 @@
 // src/controllers/view.controller.js
 const userModel = require("../models/user.model");
 const jwt = require('jsonwebtoken');
+const Product = require('../models/product.model');
 console.log("view.controller carregado!");
 
-const renderHomePage = (req, res) => {
+const renderHomePage = async (req, res) => {
   const token = req.cookies.token;
-  if (token) {
-    try {
+  try {
+    // Buscar todos os produtos
+    const products = await Product.find();
+    
+    if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      res.render('home', { title: 'Home', user: decoded });
-    } catch (error) {
-      res.render('home', { title: 'Home', user: null });
+      res.render('home', { title: 'Home', user: decoded, products });
+    } else {
+      res.render('home', { title: 'Home', user: null, products });
     }
-  } else {
-    res.render('home', { title: 'Home', user: null });
+  } catch (error) {
+    console.error("Erro ao carregar produtos:", error);
+    res.status(500).send('Erro ao carregar a página inicial');
   }
 };
 

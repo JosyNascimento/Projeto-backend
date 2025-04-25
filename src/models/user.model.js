@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   last_name: { type: String, required: true },
   email: { type: String, required: false, unique: true },
   password: { type: String, required: false },
+  cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' },
   role: { type: String, enum: ['user', 'premium', 'admin'], default: 'user' },
   resetPasswordToken: String,
   resetPasswordExpires: Date,

@@ -1,6 +1,6 @@
 // src/controllers/product.controller.js
 const productRepository = require('../repositories/products.repository');
-
+const Cart = require("../models/cart.model"); // Importando o modelo de Cart
 const Product = require("../models/product.model");
 
 
@@ -121,6 +121,39 @@ const renderProductsPage = async (req, res) => {
     }
   };
 
+  // Função para renderizar a página inicial (home.handlebars)
+  const getHomePage = async (req, res) => {
+    try {
+        // Verifica se o carrinho existe na sessão
+        if (!req.session.cartId) {
+            // Se não existir, criar um novo carrinho
+            const newCart = await Cart.create({ products: [] });
+            req.session.cartId = newCart._id;
+            console.log(`Carrinho criado para usuário não logado: ${newCart._id}`);
+        }
+
+        const featuredProducts = await Product.find({ isFeatured: true }).lean();
+        const products = await Product.find().lean();
+        const cartId = req.session.cartId; // Agora o cartId deve estar na sessão
+        res.render('home', { featuredProducts, products, cartId });
+        
+    } catch (error) {
+        console.error('Erro ao carregar a página inicial:', error);
+        res.status(500).send('Erro ao carregar a página inicial.');
+    }
+};
+
+const renderRealTimeProductsPage = async (req, res) => {
+    try {
+      const products = await Product.find().lean();
+      res.render('realtimeproducts', { products });
+    } catch (error) {
+      console.error('Erro ao renderizar página realtimeproducts:', error);
+      res.status(500).send('Erro ao carregar a página de produtos em tempo real.');
+    }
+  };
+  
+
 module.exports = {
     getAllProducts,
     createProduct,
@@ -129,4 +162,6 @@ module.exports = {
     renderAddProduct,
     renderEditProduct,
     renderProductsPage,
+    getHomePage,
+    renderRealTimeProductsPage,
 };

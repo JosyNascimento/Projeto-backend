@@ -2,7 +2,7 @@
 const CartRepository = require('../repositories/cart.repository');
 const cartRepository = new CartRepository()
 const Cart = require('../models/cart.model');
-
+const User = require('../models/user.model');
 const createCart = async (req, res) => {
     try {
         const userEmail = req.user.email; // Exemplo de e-mail enviado na requisição
@@ -50,14 +50,41 @@ const getCart = async (req, res) => {
     }
 };
 const addProductToCart = async (req, res) => {
-    try {
-        await cartRepository.addProductToCart(req.session.cartId, req.body.productId, req.body.quantity);
-        res.redirect('/cart'); // Redirecionamento para a página do carrinho
-    } catch (error) {
-        console.error('Erro ao adicionar ao carrinho:', error);
-        res.status(500).send('Erro ao adicionar ao carrinho');
+    const { pid } = req.params;
+    const userId = req.user?._id;
+
+    if (!userId) {
+        return res.status(401).json({ status: 'error', message: 'Usuário não autenticado' });
     }
+
+    let user = await User.findById(userId);
+
+    // Cria carrinho se não existir
+    if (!user.cart) {
+        const newCart = await Cart.create({ products: [] });
+        user.cart = newCart._id;
+        await user.save();
+    }
+
+    const cart = await Cart.findById(user.cart);
+    if (!cart) {
+        return res.status(404).json({ status: 'error', message: 'Carrinho não encontrado' });
+    }
+
+    // Lógica para adicionar produto
+    const existingProduct = cart.products.find(p => p.product.toString() === pid);
+
+    if (existingProduct) {
+        existingProduct.quantity += 1;
+    } else {
+        cart.products.push({ product: pid, quantity: 1 });
+    }
+
+    await cart.save();
+
+    return res.json({ status: 'success', message: 'Produto adicionado ao carrinho!' });
 };
+
 
 
 const updateCartProductQuantity = async (req, res) => {
@@ -123,7 +150,41 @@ const renderCarts = async (req, res) => {
     }
 };
 
+const addProductToCartByCartId = async (req, res) => {
+    const { cartId, productId } = req.params;
+    const { quantity = 1 } = req.body;
+
+    try {
+        const cart = await Cart.findById(cartId);
+        if (!cart) {
+            return res.status(404).json({ status: 'error', message: 'Carrinho não encontrado.' });
+        }
+
+        // Verifica se o produto já está no carrinho
+        const existingProduct = cart.products.find(p => p.product.toString() === productId);
+
+        if (existingProduct) {
+            // Se já estiver no carrinho, incrementa a quantidade
+            existingProduct.quantity += Number(quantity);
+        } else {
+            // Se não estiver, adiciona um novo produto
+            cart.products.push({ product: productId, quantity: Number(quantity) });
+        }
+
+        // Salva o carrinho atualizado
+        await cart.save();
+
+        return res.json({ status: 'success', message: 'Produto adicionado ao carrinho!' });
+
+    } catch (error) {
+        return res.status(500).json({ status: 'error', message: 'Erro ao adicionar produto ao carrinho.' });
+    }
+};
+
+
+
 module.exports = {
+    addProductToCartByCartId,
     createCart,
     getCartById,
     getCart,

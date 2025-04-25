@@ -16,24 +16,25 @@
         </tr>
       </thead>
       <tbody>
-        {{#each cart.products}}
-          <tr>
-            <td>
-              <img src="{{this.productId.imageUrl}}" alt="{{this.productId.name}}" width="100">
-            </td>
-            <td>{{this.productId.name}}</td>
-            <td>{{this.quantity}}</td>
-            <td>R$ {{this.productId.price}}</td>
-            <td>R$ {{calculateTotal this.productId.price this.quantity}}</td>
-          </tr>
-        {{/each}}
-      </tbody>
+            {{#each cart.products}}
+                <tr>
+                    <td>
+                        <img src="{{this.productId.thumbnails.[0]}}" alt="{{this.productId.title}}" width="100">
+                    </td>
+                    <td>{{this.productId.title}}</td>
+                    <td>
+                        <input type="number" value="{{this.quantity}}" min="1" onchange="updateQuantity('{{../cartId}}', '{{this.productId._id}}', this.value)">
+                    </td>
+                    <td>R$ {{this.productId.price}}</td>
+                    <td>R$ {{multiply this.productId.price this.quantity}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
     </table>
     <div>
-      <p>Total de Itens: {{totalQuantity}}</p>
-      <p>Preço Total: R$ {{totalPrice}}</p>
+        <p>Total de Itens: {{totalQuantity}}</p>
+        <p>Preço Total: R$ {{totalPrice}}</p>
     </div>
-  {{else}}
+    <a href="/" class="btn btn-primary">Continuar Comprando</a> {{else}}
     <p>Seu carrinho está vazio.</p>
-    <a href="/products">Continuar comprando</a>
-  {{/if}}
+    <a href="/" class="btn btn-primary">Continuar comprando</a> {{/if}}

@@ -1,8 +1,9 @@
 // src/utils/handlebars.utils.js
-const handlebars = require('handlebars');
+const moment = require('moment');
 
-handlebars.registerHelper('multiply', function (a, b) {
-    return a * b;
-});
-
-module.exports = handlebars;
+module.exports = {
+  helpers: {
+    multiply: (a, b) => a * b,
+    formatDate: (date) => moment(date).format('DD/MM/YYYY HH:mm:ss'), // Exemplo de formato
+  },
+};

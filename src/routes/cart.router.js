@@ -1,46 +1,25 @@
-// entregaParcial3/src/routes/cart.router.js
 const express = require("express");
 const router = express.Router();
 const ticketController = require("../controllers/ticket.controller");
+const cartController = require("../controllers/cart.controller");
 const { authorizationMiddleware } = require("../middlewares/auth.middleware");
 
-const {
-  createCart,
-  getCartById,
-  addProductToCart,
-  updateCartProductQuantity,
-  displayCart,
-  clearCart,
-  renderCarts,
-} = require("../controllers/cart.controller");
+// Rota para adicionar produto ao carrinho de usuário não logado (usa cartId da sessão)
+router.post('/api/carts/:cartId/product/:productId', cartController.addProductToCartByCartId);
 
-// Verifique se você está passando funções aqui, e não objetos ou valores incorretos
-router.post("/", authorizationMiddleware("user"), createCart); // Esta rota deve chamar createCart corretamente
-router.get("/:cid", getCartById); // Esta rota está correta também
-router.post("/add", addProductToCart); // A função addProductToCart deve ser um controlador, não um objeto
-router.put(
-  "/:cid/products/:pid",
-  authorizationMiddleware("user"),
-  updateCartProductQuantity
-);
+// 🔹 Carts
+//router.post("/", authorizationMiddleware("user"), cartController.createCart);
+router.get("/", cartController.renderCarts);       // Página de todos os carrinhos (se for uma view)
+router.get("/:cid", cartController.getCartById);     // Carrinho por ID
+router.delete("/:cid", cartController.clearCart);
 
-router.get("/", displayCart);
-router.delete("/:cid", clearCart);
-// Rota para realizar a compra e gerar o ticket
-router.post(
-  "/:cid/purchase",
-  authorizationMiddleware("user"),
-  ticketController.createTicket
-);
+// 🔹 Products in Cart (para usuários possivelmente logados, usando cid e pid)
+router.post('/:cid/product/:pid', cartController.addProductToCart);
+router.put("/:cid/product/:pid", authorizationMiddleware("user"), cartController.updateCartProductQuantity);
 
-// Rota para buscar um ticket específico
+// 🔹 Tickets
+router.post("/:cid/purchase", authorizationMiddleware("user"), ticketController.createTicket);
 router.get("/ticket/:ticketId", ticketController.getTicketById);
-router.get('/carts', renderCarts);
-// Rota para buscar todos os tickets de um usuário
-router.get(
-  "/tickets",
-  authorizationMiddleware("user"),
-  ticketController.getTicketsByUserId
-);
+router.get("/tickets", authorizationMiddleware("user"), ticketController.getTicketsByUserId);
 
 module.exports = router;

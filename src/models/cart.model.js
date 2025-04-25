@@ -8,9 +8,13 @@ const cartSchema = new mongoose.Schema({
             quantity: { type: Number, required: true },
         },
     ],
-    purchaserEmail: { type: String, required: true }, // E-mail do comprador
+    
 }, { timestamps: true });
 
+cartSchema.virtual('totalPrice').get(function() {
+    return this.products.reduce((acc, item) => acc + item.quantity * item.product.price, 0);
+  });
+  
 const Cart = mongoose.model('Cart', cartSchema);
 
 module.exports = Cart;

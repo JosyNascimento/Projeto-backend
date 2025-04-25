@@ -46,15 +46,15 @@ const registerUser = async (req, res) => {
         // Redireciona para o login com mensagem
         return res.redirect("/registro/sucesso?error=email_exists");
     }
-      // Cria o hash da senha
-      const hashedPassword = crypto.createHash('sha256').update(password).digest('hex'); // Use crypto.createHash
+      // // Cria o hash da senha
+      // const hashedPassword = crypto.createHash('sha256').update(password).digest('hex'); // Use crypto.createHash
 
       // Cria um novo usuário no banco de dados
       const newUser = await User.create({
           first_name,
           last_name,
           email,
-          password: hashedPassword,
+          password,
           role: role || "user", // Define o papel como "user" se não for fornecido
           avatar: avatar || "public/img/sandra.jpg", // Define um avatar padrão se não for fornecido
       });

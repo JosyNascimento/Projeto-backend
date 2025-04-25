@@ -154,6 +154,7 @@ const failLogin = (req, res) => {
 const logoutUser = (req, res) => {
   req.session.destroy((err) => {
     if (!err) {
+      res.clearCookie("token");
       res.redirect("/login");
     } else {
       res.status(500).json({ message: "Erro no logout", error: err });

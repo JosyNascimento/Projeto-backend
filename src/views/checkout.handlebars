@@ -1,0 +1,41 @@
+<h1>Checkout</h1>
+<form id="payment-form">
+  <div id="payment-element"></div>
+  <button id="submit">Pagar</button>
+</form>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe("SUA_CHAVE_PUBLICA"); // Substitua pela sua chave pública
+  let elements;
+
+  fetch("/checkout/create-payment-intent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount: 2000 }) // R$ 20,00
+  })
+  .then(res => res.json())
+  .then(data => {
+    const clientSecret = data.clientSecret;
+
+    elements = stripe.elements({ clientSecret });
+    const paymentElement = elements.create("payment");
+    paymentElement.mount("#payment-element");
+
+    const form = document.getElementById("payment-form");
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + "/checkout/success",
+        },
+      });
+
+      if (error) {
+        alert(error.message);
+      }
+    });
+  });
+</script>

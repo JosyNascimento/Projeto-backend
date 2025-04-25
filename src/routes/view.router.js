@@ -6,7 +6,8 @@ const userController = require("../controllers/user.controller");
 const viewController = require('../controllers/view.controller');
 const adminMiddleware = require('../middlewares/admin.middleware');
 const productController = require('../controllers/product.controller');
-//const cartController = require('../controllers/cart.controller');
+const productService = require('../services/productService');
+const cartController = require('../controllers/cart.controller');
 console.log("viewController.getAllUsers:", viewController.getAllUsers);
 
 const {
@@ -16,20 +17,25 @@ const {
     renderUpdateUserPage,
     githubCallback,
     renderProfile,
-    renderCarts
+    renderCarts,
   
 } = require("../controllers/view.controller");
 
+router.get('/realtimeproducts', (req, res) => {
+    res.render('realtimeproducts', { title: 'Realtime Products' }); // Renderiza a view 'realtimeproducts.handlebars'
+  });
+  
 router.get("/teste", (req, res) => {
     res.send("Rota de teste");
 });
-router.get("/", renderHomePage); 
+
+router.get("/", productController.getHomePage);
 router.get("/login", renderLoginPage);
 router.get("/register", renderRegisterPage);
 router.get("/registerSuccess", userController.renderRegisterSuccess);
 router.get("/updateUser/:email", renderUpdateUserPage);
 router.get("/produtos", productController.renderProductsPage);
 router.get("/profile",  renderProfile);
-
-
+//router.get("/carts", renderCarts);
+router.get('/github/callback', githubCallback);
 module.exports = router;
