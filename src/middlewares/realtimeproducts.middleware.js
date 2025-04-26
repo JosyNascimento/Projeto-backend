@@ -1,4 +1,4 @@
-// src/middlewares/admin.middleware.js
+// middlewares/realtimeproducts.middleware.js
 
 const adminMiddleware = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {

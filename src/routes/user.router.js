@@ -5,7 +5,7 @@ const authorizationMiddleware = require("../middlewares/auth.middleware");
 const userController = require("../controllers/user.controller");
 const User = require('../models/user.model');
 const { getProfile, togglePremium, changeRole, getAllUsers, renderResetPasswordPage, failResetPassword, resetPassword } = require('../controllers/user.controller'); // Importação única
-const adminMiddleware = require('../middlewares/admin.middleware');
+const adminMiddleware = require('../middlewares/realtimeproducts.middleware');
 const { autenticacao, authMiddleware, isAdmin} = require('../middlewares/auth.middleware'); // Importe autenticacao corretamente
 const methodOverride = require('method-override');
 

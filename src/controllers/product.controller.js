@@ -2,19 +2,16 @@
 const productRepository = require('../repositories/products.repository');
 const Cart = require("../models/cart.model"); // Importando o modelo de Cart
 const Product = require("../models/product.model");
-
-
+const productService = require('../services/productService'); 
+const productController = require('../controllers/product.controller');
 // Função para listar produtos com filtros, ordenação e paginação
 const getAllProducts = async (req, res) => {
     try {
         const { query, sort, page = 1, limit = 10 } = req.query;
-
         // Filtros e busca
         const filters = query === "inStock" ? { stock: { $gt: 0 } } : query ? { category: query } : {};
-
         // Ordenação
         const sortOption = sort === "asc" ? { price: 1 } : sort === "desc" ? { price: -1 } : {};
-
         // Paginação
         const skip = (page - 1) * limit;
         const products = await Product.find(filters)
@@ -75,6 +72,7 @@ const renderEditProduct = async (req, res) => {
         res.status(500).json({ message: "Erro ao buscar produto", error: error.message });
     }
 };
+
 
 // Controlador para atualizar um produto existente
 const updateProduct = async (req, res) => {
@@ -142,16 +140,6 @@ const renderProductsPage = async (req, res) => {
         res.status(500).send('Erro ao carregar a página inicial.');
     }
 };
-
-const renderRealTimeProductsPage = async (req, res) => {
-    try {
-      const products = await Product.find().lean();
-      res.render('realtimeproducts', { products });
-    } catch (error) {
-      console.error('Erro ao renderizar página realtimeproducts:', error);
-      res.status(500).send('Erro ao carregar a página de produtos em tempo real.');
-    }
-  };
   
 
 module.exports = {
@@ -163,5 +151,4 @@ module.exports = {
     renderEditProduct,
     renderProductsPage,
     getHomePage,
-    renderRealTimeProductsPage,
 };

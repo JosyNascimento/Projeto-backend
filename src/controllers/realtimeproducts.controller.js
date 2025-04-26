@@ -1,4 +1,5 @@
-const Product = require('../dao/models/Product.model');
+// controllers/realtimeproducts.controller.js
+const Product = require('../models/product.model');
 
 // Renderiza a página realtimeproducts
 exports.getRealtimeProducts = async (req, res) => {
@@ -21,16 +22,20 @@ exports.addProduct = async (req, res) => {
 };
 
 exports.deleteProduct = async (req, res) => {
-    try {
-      const { pid } = req.params;
-      await Product.findByIdAndDelete(pid);
-  
-      req.app.get('io').emit('updateProducts', await Product.find());
-      res.json({ message: 'Produto deletado com sucesso' });
-    } catch (error) {
-      res.status(500).json({ message: 'Erro ao deletar produto' });
-    }
-  };
+  try {
+    const { pid } = req.params;
+    await Product.findByIdAndDelete(pid);
+
+    // Notifica todos os clientes conectados
+    req.app.get('io').emit('updateProducts', await Product.find());
+
+    res.status(200).send({ status: 'success', message: 'Produto deletado' });
+  } catch (error) {
+    console.error('Erro ao deletar produto:', error);
+    res.status(500).send({ status: 'error', message: 'Erro ao deletar produto' });
+  }
+};
+
   
   exports.editProduct = async (req, res) => {
     try {

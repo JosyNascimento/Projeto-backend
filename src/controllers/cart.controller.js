@@ -127,7 +127,7 @@ const clearCart = async (req, res) => {
     }
 };
 
-const renderCarts = async (req, res) => {
+const renderCart = async (req, res) => {
     try {
         if (!req.session.user) {
             return res.redirect('/login');
@@ -188,7 +188,7 @@ module.exports = {
     createCart,
     getCartById,
     getCart,
-    renderCarts,
+    renderCart,
     addProductToCart,
     updateCartProductQuantity,
     displayCart,

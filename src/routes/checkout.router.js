@@ -1,17 +1,12 @@
-// routes/checkout.router.js
+// src/routes/checkout.router.js
 const express = require('express');
 const router = express.Router();
-const { createPaymentIntent } = require('../controllers/checkout.controller');
-const { paymentSuccess } = require('../controllers/checkout.controller');
+const checkoutController = require('../controllers/checkout.controller'); 
 
-// Rota para criar um intent de pagamento
-router.post('/create-payment-intent', createPaymentIntent);
+router.post('/create-payment-intent', checkoutController.createPaymentIntent);
+router.get('/payment-success', checkoutController.paymentSuccess);
+router.get('/checkout', checkoutController.renderCheckoutPage);// Rota para exibir a página de checkout
 
-//router.get('/success', paymentSuccess);
-
-// Rota que mostra a página de sucesso após pagamento aprovado
-router.get('/success', (req, res) => {
-  res.render('checkoutSuccess'); // renderiza a view
-});
+router.post('/checkout/process', checkoutController.processCheckout);// Rota para processar o envio do checkout
 
 module.exports = router;

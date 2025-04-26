@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
 const chatRouter = require("./routes/chat.router");
-
+const realTimeProductsRouter = require('./routes/realTimeProducts.router');
 const Message = require("./models/chat.model");
 const productsApiRouter = require("./routes/api/apiProduct.router");
 const productRouter = require("./routes/products.router");
@@ -122,8 +122,9 @@ app.use("/", userRouter);
 app.use("/", chatRouter);
 app.use("/cart", cartRouter);
 app.use("/products", productRouter);
-app.use("/addProduct", productRouter); // Use productRouter para consistência
-app.use("/deleteProduct", productRouter); // Use productRouter para consistência
+app.use('/admin', realTimeProductsRouter);
+app.use("/addProduct", productRouter); 
+app.use("/deleteProduct", productRouter); 
 app.use("/test", testRouter);
 app.use("/checkout", checkoutRouter);
 

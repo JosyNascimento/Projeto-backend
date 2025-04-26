@@ -1,6 +1,7 @@
+// routes/realTimeProducts.router.js
 const express = require('express');
 const router = express.Router();
-const adminController = require('../controllers/admin.controller');
+const adminController = require('../controllers/realtimeproducts.controller');
 const { authorizationMiddleware } = require('../middlewares/auth.middleware');
 
 // Página de produtos em tempo real (restrita a admin)

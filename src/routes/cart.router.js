@@ -9,7 +9,7 @@ router.post('/api/carts/:cartId/product/:productId', cartController.addProductTo
 
 // 🔹 Carts
 //router.post("/", authorizationMiddleware("user"), cartController.createCart);
-router.get("/", cartController.renderCarts);       // Página de todos os carrinhos (se for uma view)
+router.get("/", cartController.renderCart);       // Página de todos os carrinhos (se for uma view)
 router.get("/:cid", cartController.getCartById);     // Carrinho por ID
 router.delete("/:cid", cartController.clearCart);
 
