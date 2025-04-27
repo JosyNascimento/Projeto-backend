@@ -1,12 +1,12 @@
-// /src/controllers/authorization.controller.js
+// /src/controllers/auth.controller.js
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { generateToken } = require('../utils/jwt.utils');
 const passport = require("../config/passport.config.js");
 const User = require("../models/user.model.js");
+const nodemailer = require('nodemailer'); // Para enviar emails
 const crypto = require("crypto");
-
-
+const { sendEmail } = require('../utils/mailer');
 const renderLoginPage = (req, res) => {
   res.render("profile");
 };
@@ -67,10 +67,6 @@ const loginUser = async (req, res) => {
     }
 };
 
-const renderResetPasswordPage = (req, res) => {
-  res.render("resetPassword", { title: "Redefinir Senha" });
-};
-
 const failResetPassword = (req, res) => {
   res.status(400).render("error", {
     message: "Erro ao tentar redefinir a senha. Por favor, tente novamente.",
@@ -83,69 +79,96 @@ const renderForgotPassword = (req, res) => {
   console.log("renderForgotPassword definido:", renderForgotPassword);
 };
 
-//2
+
 const forgotPassword = async (req, res) => {
   try {
       const { email } = req.body;
       const user = await User.findOne({ email });
       if (!user) {
-          return res.status(404).json({ message: "Usuário não encontrado" });
+        return res.render('forgotPasswordSuccess', { message: 'Se este e-mail estiver registrado, um link de recuperação foi enviado.' });
       }
       // Gera um token de redefinição de senha validação de 1 hora
       const resetToken = crypto.randomBytes(20).toString("hex");
       user.resetPasswordToken = resetToken;
       user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+  
 
-      await User.updateOne(
-          { _id: user._id },
-          {
-              resetPasswordToken: resetToken,
-              resetPasswordExpires: user.resetPasswordExpires,
-          }
-      );
+      await sendEmail({
+        to: user.email,
+        subject: 'Link para redefinição de senha',
+        html: `
+          <p>Você solicitou a redefinição da sua senha.</p>
+          <p><a href="${resetLink}">Clique aqui para redefinir</a></p>
+          <p>Este link expira em 1 hora.</p>
+        `,
+      });
+      
 
-      //link para redefinir a senha enviado por email
-      const resetLink = `http://localhost:8080/reset-password/${resetToken}`;
-      await sendEmail(
-          email,
-          "Recuperação de Senha",
-          `Clique <a href="${resetLink}">aqui</a> para redefinir sua senha.`
-      );
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_SECURE === 'true', // Converte string para boolean
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+      });
+      const resetLink = `http://localhost:8080/reset-password/${resetToken}`; // Link para a página de redefinição
+  
+      const mailOptions = {
+        to: user.email,
+        subject: 'Link para redefinição de senha',
+        html: `<p>Você solicitou a redefinição da sua senha. Clique no link abaixo para prosseguir:</p><a href="${resetLink}">Redefinir senha</a><p>Este link é válido por 1 hora.</p>`,
+      };
+  
+      await transporter.sendMail(mailOptions)
+      .then(info => {
+        console.log('E-mail enviado:', info);
+        res.render('forgotPasswordSuccess', { message: 'Um link de recuperação de senha foi enviado para o seu e-mail.' });
+      })
+      .catch(error => {
+        console.error('Erro ao enviar e-mail:', error);
+        res.render('forgotPassword', { message: 'Ocorreu um erro ao enviar o e-mail de recuperação.' });
+      });
 
-      // Após enviar o e-mail, redireciona para a página de sucesso
-      res.redirect("/forgot-password-success");
   } catch (error) {
-      console.error("Erro ao solicitar recuperação de senha:", error);
-      res.status(500).json({ message: "Erro ao solicitar recuperação de senha", error: error.message });
+    console.error('Erro ao solicitar recuperação de senha:', error);
+    res.render('forgotPassword', { message: 'Ocorreu um erro ao processar sua solicitação.' });
   }
 };
 
 
 const resetPassword = async (req, res) => {
   try {
-      const { token, password } = req.body;
-      const user = await User.findOne({
-          resetPasswordToken: token,
-          resetPasswordExpires: { $gt: Date.now() },
-      });
-      if (!user) {
-          return res.status(400).json({ message: "Token inválido ou expirado" });
-      }
-      //valida se a senha foi alterada
-      const isSamePassword = await bcrypt.compare(password, user.password);
-      if (isSamePassword) {
-          return res.status(400).json({ message: "Não é possível utilizar a mesma senha!" });
-      }
-      user.password = password;
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined;
-      await user.save();
-      res.redirect("/login");
+    const { token, password } = req.body;
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res.status(400).json({ message: "Token inválido ou expirado" });
+    }
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({ message: "Não é possível utilizar a mesma senha!" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash a nova senha
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    res.redirect("/login?message=Senha redefinida com sucesso"); // Adicione mensagem de sucesso na query
   } catch (error) {
-      console.error("Erro ao redefinir senha:", error);
-      res.status(500).json({ message: "Erro ao redefinir senha", error: error.message });
+    console.error("Erro ao redefinir senha:", error);
+    res.status(500).json({ message: "Erro ao redefinir senha", error: error.message });
   }
 };
+
+const renderResetPasswordPage = (req, res) => {
+  const { token } = req.params;
+  res.render('resetPassword', { token });
+};
+
 // Falha no login
 const failLogin = (req, res) => {
   res.status(401).json({ message: "Usuário ou senha inválidos" });

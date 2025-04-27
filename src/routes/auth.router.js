@@ -3,11 +3,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const authController = require("../controllers/auth.controller");
-const {
-  registerUser,
-  renderRegisterSuccess,
-} = require("../controllers/user.controller");
-
+const { registerUser, renderRegisterSuccess,} = require("../controllers/user.controller");
 const {
   failResetPassword,
   renderResetPasswordPage,
@@ -44,13 +40,11 @@ router.get("/forgot-password", renderForgotPassword);
 router.get("/reset-password", renderResetPasswordPage);
 router.get("/logout", logoutUser);
 router.get("/failreset", failResetPassword);
-router.post(
-  "/reset-password",
+router.post("/reset-password/:token", // Atualizei para receber o token
   passport.authenticate("reset-password", {
     failureRedirect: "/failreset",
     failureMessage: true,
   }),
   resetPassword
 );
-
 module.exports = router;

@@ -47,7 +47,7 @@ const io = new Server(server, {
 
 // Disponibiliza o io para os controllers acessarem
 app.set("io", io);
-app.set("view engine", "handlebars");
+
 // Configuração do WebSocket
 setupWebSocket(io); // Chama setupWebSocket UMA VEZ aqui
 

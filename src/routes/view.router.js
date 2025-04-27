@@ -4,6 +4,7 @@ const router = express.Router();
 const { authMiddleware } = require("../middlewares/auth.middleware");
 const userController = require("../controllers/user.controller");
 const viewController = require('../controllers/view.controller');
+const authController = require('../controllers/auth.controller');
 const productController = require('../controllers/product.controller');
 console.log("productController:", productController);
 const productService = require('../services/productService');
@@ -29,10 +30,24 @@ router.get('/realtimeproducts', adminMiddleware, (req, res) => {
 router.get("/teste", (req, res) => {
     res.send("Rota de teste");
 });
+router.get('/reset-password', (req, res) => {
+    res.render('forgotPassword', { title: 'Esqueci a Senha' }); 
+  });
 router.get('/cart', cartController.renderCart);
 router.post('/cart/add', cartController.addProductToCart);
 router.get("/", productController.getHomePage);
+
 router.get("/login", renderLoginPage);
+//router.get('/forgot-password', viewController.renderForgotPassword);
+router.get('/forgot-password-info', (req, res) => {
+    res.render('forgotPasswordSuccess', { title: 'Link Enviado' });
+  });
+router.get('/forgot-password-success', (req, res) => {
+  res.render('forgotPasswordSuccess', { title: 'Link Enviado' });
+});
+router.get('/reset-password/:token', viewController.renderResetPassword);
+router.get('/logout', authController.logoutUser);
+router.get('/failreset', authController.failResetPassword);
 router.get("/register", renderRegisterPage);
 router.get("/registerSuccess", userController.renderRegisterSuccess);
 router.get("/updateUser/:email", renderUpdateUserPage);

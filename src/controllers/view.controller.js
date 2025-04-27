@@ -27,8 +27,6 @@ const renderRegisterPage = (req, res) => {
     res.render("register");
 };
 
-const renderForgotPassword = (req, res) => res.render('forgot-password');
-console.log("renderForgotPassword definido:", renderForgotPassword);
 
 const renderUpdateUserPage = async (req, res) => {
   try {
@@ -61,11 +59,16 @@ const renderProfile = (req, res) => {
   res.render('profile', { user: req.session.user });
 };
 
+const renderForgotPassword = (req, res) => {
+  res.render('forgotPassword', { title: 'Esqueci a Senha' });
+};
+
 // Adicionando a função renderResetPassword
 const renderResetPassword = (req, res) => {
-    console.log("renderResetPassword chamado!");
-    res.render('reset-password'); 
-  };
+  const { token } = req.params; // Recebe o token da URL
+  console.log("renderResetPassword chamado!");
+  res.render('resetPassword', { title: 'Redefinir Senha', token }); // Renderiza a view 'resetPassword'
+};
 
   
 
@@ -77,5 +80,7 @@ module.exports = {
     renderForgotPassword,
     githubCallback,
     renderProfile,
+    renderResetPassword,
+    renderForgotPassword,
     renderResetPassword,
    };
