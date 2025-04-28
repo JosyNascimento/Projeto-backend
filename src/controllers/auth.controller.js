@@ -20,7 +20,7 @@ const getGithubAuth = () => {
 
 const githubCallback = passport.authenticate("github", {
   failureRedirect: "/login",
-  successRedirect: "/perfil", // Correção: redirecionamento direto para /perfil
+  successRedirect: "/perfil", //redirecionamento para /perfil
 });
 
 const handleGithubCallback = (req, res) => {

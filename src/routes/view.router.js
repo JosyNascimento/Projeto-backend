@@ -45,6 +45,10 @@ router.get('/forgot-password-info', (req, res) => {
 router.get('/forgot-password-success', (req, res) => {
   res.render('forgotPasswordSuccess', { title: 'Link Enviado' });
 });
+// Rota para renderizar a página do chat
+router.get('/chat', (req, res) => {
+  res.render('chat', { title: 'Chat' });
+});
 router.get('/reset-password/:token', viewController.renderResetPassword);
 router.get('/logout', authController.logoutUser);
 router.get('/failreset', authController.failResetPassword);

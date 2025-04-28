@@ -4,36 +4,28 @@ const Cart = require("../models/cart.model"); // Importando o modelo de Cart
 const Product = require("../models/product.model");
 const productService = require('../services/productService'); 
 const productController = require('../controllers/product.controller');
+
 // Função para listar produtos com filtros, ordenação e paginação
 const getAllProducts = async (req, res) => {
     try {
-        const { query, sort, page = 1, limit = 10 } = req.query;
-        // Filtros e busca
-        const filters = query === "inStock" ? { stock: { $gt: 0 } } : query ? { category: query } : {};
-        // Ordenação
-        const sortOption = sort === "asc" ? { price: 1 } : sort === "desc" ? { price: -1 } : {};
-        // Paginação
-        const skip = (page - 1) * limit;
-        const products = await Product.find(filters)
-            .sort(sortOption)
-            .skip(skip)
-            .limit(Number(limit));
-
-        const totalProducts = await Product.countDocuments(filters);
-        const totalPages = Math.ceil(totalProducts / limit);
-
-        res.status(200).json({
-            status: "success",
-            payload: products,
-            totalPages,
-            page: Number(page),
-        });
+      let products;
+      const { all } = req.query; // Verifica o parâmetro 'all'
+  
+      if (all === 'true') {
+        // Se 'all=true', retorna todos os produtos
+        products = await Product.find();
+      } else {
+        // Caso contrário, pode usar paginação (ou lógica padrão)
+        products = await Product.find().limit(10); // Exemplo de limitação de 10 produtos
+      }
+  
+      res.json(products);
     } catch (error) {
-        console.error('Erro ao buscar produtos:', error);
-        res.status(500).send('Erro ao buscar produtos.');
+      console.error('Erro ao buscar produtos:', error);
+      res.status(500).json({ message: 'Erro ao buscar produtos' });
     }
-};
-
+  };
+  
 const createProduct = async (req, res) => {
     try {
         const newProduct = await productRepository.createProduct(req.body);

@@ -122,7 +122,7 @@ app.use("/", userRouter);
 app.use("/", chatRouter);
 app.use("/cart", cartRouter);
 app.use("/products", productRouter);
-app.use('/admin', realTimeProductsRouter);
+app.use('/', realTimeProductsRouter);
 app.use("/addProduct", productRouter); 
 app.use("/deleteProduct", productRouter); 
 app.use("/test", testRouter);
