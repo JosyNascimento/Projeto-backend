@@ -137,6 +137,23 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const { sendEmail } = require('../utils/mailer');
+
+// Exemplo de função para enviar um e-mail de boas-vindas
+const sendWelcomeEmail = async (userEmail) => {
+  try {
+    await sendEmail({
+      to: userEmail,
+      subject: 'Bem-vindo ao nosso site!',
+      html: '<h1>Obrigado por se cadastrar!</h1><p>Estamos felizes em tê-lo conosco.</p>'
+    });
+  } catch (error) {
+    console.error('Erro ao enviar e-mail de boas-vindas:', error);
+  }
+};
+
+module.exports = { sendWelcomeEmail };
+
 const renderUserList = async (req, res) => {
   console.log("renderUserList chamado!");
   console.log("req.user:", req.user);
@@ -170,6 +187,7 @@ module.exports = {
   adminUsers,
   changeRole,
   getUserById,
+  sendWelcomeEmail,
   getAllUsers,
   renderUserList,
 };

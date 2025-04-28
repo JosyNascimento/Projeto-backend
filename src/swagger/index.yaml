@@ -21,9 +21,12 @@ tags:
     description: Finalização da compra
 
 paths:
-  $ref: './carts.yaml'
-  $ref: './products.yaml'
-  $ref: './tickets.yaml'
+  /api/carts:
+    $ref: './carts.yaml'
+  /api/products:
+    $ref: './products.yaml'
+  /api/tickets:
+    $ref: './tickets.yaml'
 
   #  paths
   /api/sessions/login:
