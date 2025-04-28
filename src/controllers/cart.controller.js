@@ -33,58 +33,71 @@ const getCartById = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+// Exibe os produtos do carrinho
 const getCart = async (req, res) => {
+    const { cartId } = req.params;
+  
     try {
-        const cart = await Cart.findOne({ userId: req.body.userId }).populate(
-            'products.productId'
-        );
+      const cart = await Cart.findById(cartId).populate('products.product');
+      if (!cart) {
+        return res.status(404).send('Carrinho não encontrado');
+      }
+  
+      // Calcula o valor total
+      const totalPrice = cart.products.reduce((total, item) => {
+        return total + item.product.price * item.quantity;
+      }, 0);
+  
+      res.render('carts', { cart, totalPrice });
+    } catch (error) {
+      console.error('Erro ao carregar o carrinho:', error);
+      res.status(500).send('Erro ao carregar o carrinho');
+    }
+  };
+  
+// Adiciona um produto ao carrinho
+const addProductToCart = async (req, res) => {
+    const { cartId, productId } = req.params;
+    const { quantity } = req.body;
+
+    try {
+        // Encontre o carrinho pelo ID
+        const cart = await Cart.findById(cartId);
 
         if (!cart) {
             return res.status(404).json({ message: 'Carrinho não encontrado' });
         }
 
-        return res.status(200).json(cart);
+        // Encontre o produto
+        const product = await Product.findById(productId);  // Certifique-se de que o modelo Product está importado
+
+        if (!product) {
+            return res.status(404).json({ message: 'Produto não encontrado' });
+        }
+if (!quantity || quantity <= 0) {
+    return res.status(400).json({ message: 'Quantidade inválida' });
+}
+
+        // Verifica se o produto já existe no carrinho
+        const existingProduct = cart.products.find(p => p.product.toString() === productId);
+
+        if (existingProduct) {
+            // Se já estiver no carrinho, incrementa a quantidade
+            existingProduct.quantity += quantity;
+        } else {
+            // Se não estiver, adiciona um novo produto
+            cart.products.push({ product: productId, quantity });
+        }
+
+        // Salvar o carrinho atualizado
+        await cart.save();
+
+        return res.status(200).json({ message: 'Produto adicionado ao carrinho' });
     } catch (error) {
-        console.error('Erro ao buscar carrinho:', error);
-        return res.status(500).json({ message: 'Erro interno do servidor' });
+        console.error('Erro ao adicionar produto ao carrinho:', error);
+        return res.status(500).json({ message: 'Erro ao adicionar produto ao carrinho' });
     }
 };
-const addProductToCart = async (req, res) => {
-    const { pid } = req.params;
-    const userId = req.user?._id;
-
-    if (!userId) {
-        return res.status(401).json({ status: 'error', message: 'Usuário não autenticado' });
-    }
-
-    let user = await User.findById(userId);
-
-    // Cria carrinho se não existir
-    if (!user.cart) {
-        const newCart = await Cart.create({ products: [] });
-        user.cart = newCart._id;
-        await user.save();
-    }
-
-    const cart = await Cart.findById(user.cart);
-    if (!cart) {
-        return res.status(404).json({ status: 'error', message: 'Carrinho não encontrado' });
-    }
-
-    // Lógica para adicionar produto
-    const existingProduct = cart.products.find(p => p.product.toString() === pid);
-
-    if (existingProduct) {
-        existingProduct.quantity += 1;
-    } else {
-        cart.products.push({ product: pid, quantity: 1 });
-    }
-
-    await cart.save();
-
-    return res.json({ status: 'success', message: 'Produto adicionado ao carrinho!' });
-};
-
 
 
 const updateCartProductQuantity = async (req, res) => {
@@ -155,29 +168,50 @@ const addProductToCartByCartId = async (req, res) => {
     const { quantity = 1 } = req.body;
 
     try {
+        console.log("Recebendo solicitação para adicionar produto ao carrinho:");
+        console.log("CartId:", cartId, "ProductId:", productId, "Quantity:", quantity);
+
         const cart = await Cart.findById(cartId);
         if (!cart) {
+            console.log("Carrinho não encontrado");
             return res.status(404).json({ status: 'error', message: 'Carrinho não encontrado.' });
+        }
+
+        console.log("Carrinho encontrado:", cart);
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            console.log("Produto não encontrado");
+            return res.status(404).json({ status: 'error', message: 'Produto não encontrado.' });
+        }
+
+        console.log("Produto encontrado:", product);
+
+        // Verificar estoque
+        if (quantity > product.stock) {
+            console.log("Quantidade solicitada excede o estoque disponível");
+            return res.status(400).json({ message: 'Quantidade solicitada excede o estoque disponível' });
         }
 
         // Verifica se o produto já está no carrinho
         const existingProduct = cart.products.find(p => p.product.toString() === productId);
-
         if (existingProduct) {
-            // Se já estiver no carrinho, incrementa a quantidade
+            console.log("Produto já existe no carrinho. Atualizando quantidade.");
             existingProduct.quantity += Number(quantity);
         } else {
-            // Se não estiver, adiciona um novo produto
+            console.log("Produto não existe no carrinho. Adicionando novo produto.");
             cart.products.push({ product: productId, quantity: Number(quantity) });
         }
 
         // Salva o carrinho atualizado
         await cart.save();
+        console.log("Carrinho atualizado:", cart);
 
         return res.json({ status: 'success', message: 'Produto adicionado ao carrinho!' });
 
     } catch (error) {
-        return res.status(500).json({ status: 'error', message: 'Erro ao adicionar produto ao carrinho.' });
+        console.error("Erro ao adicionar produto ao carrinho:", error);
+        return res.status(500).json({ status: 'error', message: `Erro ao adicionar produto ao carrinho: ${error.message}` });
     }
 };
 

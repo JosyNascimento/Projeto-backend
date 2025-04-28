@@ -1,40 +1,106 @@
+<!-- cart.handlebars -->
+<h1 class="text-center mt-4">Carrinho de Compras</h1>
 
-      <h1>Meu Carrinho</h1>
-      <h2>Itens no Carrinho</h2>
-  
- {{#if cart.items.length}}
-    <table>
-      <thead>
-        <tr>
-          <th>Imagem</th>
-          <th>Produto</th>
-          <th>Quantidade</th>
-          <th>Preço Unitário</th>
-          <th>Total</th>
-
-          
-        </tr>
-      </thead>
-      <tbody>
-            {{#each cart.products}}
-                <tr>
-                    <td>
-                        <img src="{{this.productId.thumbnails.[0]}}" alt="{{this.productId.title}}" width="100">
-                    </td>
-                    <td>{{this.productId.title}}</td>
-                    <td>
-                        <input type="number" value="{{this.quantity}}" min="1" onchange="updateQuantity('{{../cartId}}', '{{this.productId._id}}', this.value)">
-                    </td>
-                    <td>R$ {{this.productId.price}}</td>
-                    <td>R$ {{multiply this.productId.price this.quantity}}</td>
-                </tr>
-            {{/each}}
-        </tbody>
-    </table>
-    <div>
-        <p>Total de Itens: {{totalQuantity}}</p>
-        <p>Preço Total: R$ {{totalPrice}}</p>
+<!-- Lista de Produtos no Carrinho -->
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {{#each cart.products}}
+    <div class="col">
+      <div class="card h-100">
+        <img src="{{this.product.thumbnails.[0]}}" class="card-img-top" alt="{{this.product.title}}">
+        <div class="card-body">
+          <h5 class="card-title">{{this.product.title}}</h5>
+          <p class="card-text">{{this.product.description}}</p>
+          <p><strong>R$ {{this.product.price}}</strong></p>
+          <p><strong>Quantidade: {{this.quantity}}</strong></p>
+          <p><strong>Total: R$ {{this.product.price * this.quantity}}</strong></p>
+        </div>
+      </div>
     </div>
-    <a href="/" class="btn btn-primary">Continuar Comprando</a> {{else}}
-    <p>Seu carrinho está vazio.</p>
-    <a href="/" class="btn btn-primary">Continuar comprando</a> {{/if}}
+  {{/each}}
+</div>
+
+<!-- Valor Total da Compra -->
+<div class="total-value mt-3">
+  <h3>Total: R$ {{totalPrice}}</h3>
+</div>
+
+<!-- Botão para Finalizar Compra -->
+<div class="finalize-btn">
+  <a href="/checkout/{{cart._id}}" class="btn btn-primary">Finalizar Compra</a>
+</div>
+
+<!-- Atualizar Quantidade de Produtos -->
+<h2>Itens no Carrinho</h2>
+{{#if cart.items.length}}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Imagem</th>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Preço Unitário</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each cart.products}}
+        <tr>
+          <td>
+            <img src="{{this.product.thumbnails.[0]}}" alt="{{this.product.title}}" width="100">
+          </td>
+          <td>{{this.product.title}}</td>
+          <td>
+            <input type="number" value="{{this.quantity}}" min="1" onchange="updateQuantity('{{../cartId}}', '{{this.product._id}}', this.value)">
+          </td>
+          <td>R$ {{this.product.price}}</td>
+          <td>R$ {{multiply this.product.price this.quantity}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <div>
+    <p>Total de Itens: {{totalQuantity}}</p>
+    <p>Preço Total: R$ {{totalPrice}}</p>
+  </div>
+  <a href="/" class="btn btn-primary">Continuar Comprando</a>
+{{else}}
+  <p>Seu carrinho está vazio.</p>
+  <a href="/" class="btn btn-primary">Continuar comprando</a>
+{{/if}}
+<script>
+  async function updateQuantity(cartId, productId, quantity) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quantity })
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const error = await response.json();
+        alert("Erro ao atualizar quantidade: " + error.message);
+      }
+    } catch (err) {
+      console.error("Erro inesperado:", err);
+      alert("Erro inesperado ao atualizar a quantidade.");
+    }
+  }
+  const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ quantity: 1 }) 
+});
+
+if (response.ok) {
+  alert("Produto adicionado ao carrinho!");
+} else {
+  const error = await response.json();
+  console.error("Erro ao adicionar ao carrinho:", error);
+  alert("Erro ao adicionar ao carrinho: " + error.message);
+}
+
+</script>

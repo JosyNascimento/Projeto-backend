@@ -8,18 +8,21 @@ const { authorizationMiddleware } = require("../middlewares/auth.middleware");
 router.post('/api/carts/:cartId/product/:productId', cartController.addProductToCartByCartId);
 
 // 🔹 Carts
-//router.post("/", authorizationMiddleware("user"), cartController.createCart);
-router.get("/", cartController.renderCart);       // Página de todos os carrinhos (se for uma view)
-router.get("/:cid", cartController.getCartById);     // Carrinho por ID
-router.delete("/:cid", cartController.clearCart);
+// Rota para visualizar todos os carrinhos (para admins ou usuários com permissão)
+router.get("/", cartController.renderCart); // Exibe todos os carrinhos (se for uma view)
+router.get("/:cid", cartController.getCartById); // Exibe um carrinho específico
+router.delete("/:cid", cartController.clearCart); // Limpa o carrinho
 
-// 🔹 Products in Cart (para usuários possivelmente logados, usando cid e pid)
-router.post('/:cid/product/:pid', cartController.addProductToCart);
+// 🔹 Produtos no Carrinho
+// Adicionar produto ao carrinho de um usuário logado
+router.post('/:cid/product/:pid', authorizationMiddleware("user"), cartController.addProductToCart);
+
+// Atualizar a quantidade de um produto no carrinho
 router.put("/:cid/product/:pid", authorizationMiddleware("user"), cartController.updateCartProductQuantity);
 
-// 🔹 Tickets
-router.post("/:cid/purchase", authorizationMiddleware("user"), ticketController.createTicket);
-router.get("/ticket/:ticketId", ticketController.getTicketById);
-router.get("/tickets", authorizationMiddleware("user"), ticketController.getTicketsByUserId);
+// 🔹 Tickets (compra finalizada)
+router.post("/:cid/purchase", authorizationMiddleware("user"), ticketController.createTicket); // Cria o ticket após a compra
+router.get("/ticket/:ticketId", ticketController.getTicketById); // Exibe os detalhes de um ticket
+router.get("/tickets", authorizationMiddleware("user"), ticketController.getTicketsByUserId); // Lista de tickets do usuário
 
 module.exports = router;

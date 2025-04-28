@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Melhorando a arquitetura do Servidor",
   "main": "src/app.js",
+  
   "scripts": {
+    "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +13,7 @@
   "author": "Josy",
   "license": "ISC",
   "dependencies": {
+    "type": "module" ,
     "@faker-js/faker": "^9.7.0",
     "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
@@ -40,7 +43,8 @@
     "stripe": "^18.0.0",
     "supertest": "^6.3.3",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "chai": "^4.3.7",

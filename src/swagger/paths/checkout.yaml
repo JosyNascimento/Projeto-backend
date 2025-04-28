@@ -1,0 +1,20 @@
+paths:
+  /api/checkout/{cid}:
+    post:
+      tags:
+        - Checkout
+      summary: Finalizar compra de um carrinho
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID do carrinho
+      responses:
+        '200':
+          description: Compra finalizada com sucesso (ticket gerado)
+        '400':
+          description: Erro ao processar compra (ex: falta de estoque)
+        '404':
+          description: Carrinho não encontrado

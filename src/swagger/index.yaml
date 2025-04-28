@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  version: 1.0.0
+  description: Documentação da API do seu projeto
+servers:
+  - url: http://localhost:8080
+    description: Servidor de Desenvolvimento
+tags:
+  - name: Products
+    description: Operações relacionadas aos produtos
+  - name: Carts
+    description: Operações relacionadas aos carrinhos de compra
+  - name: Tickets
+    description: Operações relacionadas aos tickets de compra
+  - name: Sessions
+    description: Gerenciamento de sessões de usuários (login, logout, register)
+  - name: Auth
+    description: Autenticação OAuth e recuperação de senha
+  - name: Checkout
+    description: Finalização da compra
+
+paths:
+  $ref: './carts.yaml'
+  $ref: './products.yaml'
+  $ref: './tickets.yaml'
+
+  #  paths
+  /api/sessions/login:
+    $ref: './paths/sessions.yaml#/paths/~1api~1sessions~1login/post'
+  /api/sessions/logout:
+    $ref: './paths/sessions.yaml#/paths/~1api~1sessions~1logout/post'
+  /api/sessions/register:
+    $ref: './paths/sessions.yaml#/paths/~1api~1sessions~1register/post'
+  /api/sessions/current:
+    $ref: './paths/sessions.yaml#/paths/~1api~1sessions~1current/get'
+
+  /api/auth/github:
+    $ref: './paths/auth.yaml#/paths/~1api~1auth~1github/get'
+  /api/auth/github/callback:
+    $ref: './paths/auth.yaml#/paths/~1api~1auth~1github~1callback/get'
+  /api/auth/forgot-password:
+    $ref: './paths/auth.yaml#/paths/~1api~1auth~1forgot-password/post'
+  /api/auth/reset-password:
+    $ref: './paths/auth.yaml#/paths/~1api~1auth~1reset-password/post'
+
+  /api/checkout/{cid}:
+    $ref: './paths/checkout.yaml#/paths/~1api~1checkout~1{cid}/post'

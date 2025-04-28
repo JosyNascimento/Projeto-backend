@@ -11,7 +11,6 @@ const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
 const chatRouter = require("./routes/chat.router");
 const realTimeProductsRouter = require('./routes/realTimeProducts.router');
-const Message = require("./models/chat.model");
 const productsApiRouter = require("./routes/api/apiProduct.router");
 const productRouter = require("./routes/products.router");
 const passport = require("./config/passport.config");
@@ -31,11 +30,14 @@ const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const seedRouter = require("./routes/seed.router");
 const checkoutRouter = require("./routes/checkout.router");
-
+const setupSwagger = require('./utils/swagger');
 // Conectar ao banco de dados
 connectDB();
 
+
+
 const app = express();
+
 const server = http.createServer(app);
 // 🔥 Socket.IO com CORS habilitado
 const io = new Server(server, {
@@ -45,6 +47,7 @@ const io = new Server(server, {
   },
 });
 
+setupSwagger(app);
 // Disponibiliza o io para os controllers acessarem
 app.set("io", io);
 
@@ -127,25 +130,35 @@ app.use("/addProduct", productRouter);
 app.use("/deleteProduct", productRouter); 
 app.use("/test", testRouter);
 app.use("/checkout", checkoutRouter);
+app.use(cors());
 
-// Swagger setup
+// Configuração do Swagger
 const swaggerOptions = {
-  swaggerDefinition: {
+  definition: {
+    openapi: '3.0.0',
     info: {
-      title: "API Documentation",
-      description: "API for the project",
-      version: "1.0.0",
+      title: 'API Documentation',
+      version: '1.0.0',
+      description: 'Documentação da API do projeto',
     },
+    servers: [
+      {
+        url: 'http://localhost:8080',
+        description: 'Projeto final com documentação swagger',
+      },
+    ],
   },
-  apis: ["./src/routes/**/*.js"], // Caminho para os arquivos das rotas que você deseja documentar
+  apis: [
+    './src/swagger/index.yaml',    // 👈 O principal
+    './src/swagger/carts.yaml',     // 👈 Endpoints de carrinho
+    './src/swagger/products.yaml',  // 👈 Endpoints de produtos
+    './src/swagger/tickets.yaml',   // 👈 Endpoints de tickets
+    './src/swagger/paths/*.yaml',   // 👈 Sessions, Auth, Checkout (todos no paths/)
+  ],
 };
-const specs = swaggerJSDoc(swaggerOptions);
-app.use("/apidocs", swaggerUi.serve, swaggerUi.setup(specs));
 
-app.get('/realtimeproducts', (req, res) => {
-    res.render('realtimeproducts', { title: 'Realtime Products' });
-  });
-  
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Middleware de erro global
 app.use((err, req, res, next) => {
     console.error(err); // Log the error to the console
