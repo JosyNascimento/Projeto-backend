@@ -26,3 +26,4 @@ window.addToCart = async function(productId, cartId) {
     alert("Erro inesperado ao adicionar ao carrinho.");
   }
 };
+

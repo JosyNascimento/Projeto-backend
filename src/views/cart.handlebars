@@ -1,106 +1,133 @@
-<!-- cart.handlebars -->
 <h1 class="text-center mt-4">Carrinho de Compras</h1>
 
 <!-- Lista de Produtos no Carrinho -->
 <div class="row row-cols-1 row-cols-md-3 g-4">
   {{#each cart.products}}
-    <div class="col">
-      <div class="card h-100">
-        <img src="{{this.product.thumbnails.[0]}}" class="card-img-top" alt="{{this.product.title}}">
-        <div class="card-body">
-          <h5 class="card-title">{{this.product.title}}</h5>
-          <p class="card-text">{{this.product.description}}</p>
-          <p><strong>R$ {{this.product.price}}</strong></p>
-          <p><strong>Quantidade: {{this.quantity}}</strong></p>
-          <p><strong>Total: R$ {{this.product.price * this.quantity}}</strong></p>
-        </div>
       </div>
     </div>
   {{/each}}
 </div>
 
-<!-- Valor Total da Compra -->
-<div class="total-value mt-3">
-  <h3>Total: R$ {{totalPrice}}</h3>
-</div>
-
-<!-- Botão para Finalizar Compra -->
-<div class="finalize-btn">
-  <a href="/checkout/{{cart._id}}" class="btn btn-primary">Finalizar Compra</a>
-</div>
-
-<!-- Atualizar Quantidade de Produtos -->
-<h2>Itens no Carrinho</h2>
-{{#if cart.items.length}}
+{{#if cart.products.length}}
   <table class="table">
     <thead>
+      <tr data-product-id="{{this.product._id}}"></tr>
       <tr>
-        <th>Imagem</th>
+        <th>Selecionar</th> <th>Imagem</th>
         <th>Produto</th>
         <th>Quantidade</th>
         <th>Preço Unitário</th>
         <th>Total</th>
+          <th>Ações</th> 
       </tr>
     </thead>
     <tbody>
-      {{#each cart.products}}
-        <tr>
-          <td>
-            <img src="{{this.product.thumbnails.[0]}}" alt="{{this.product.title}}" width="100">
-          </td>
-          <td>{{this.product.title}}</td>
-          <td>
-            <input type="number" value="{{this.quantity}}" min="1" onchange="updateQuantity('{{../cartId}}', '{{this.product._id}}', this.value)">
-          </td>
-          <td>R$ {{this.product.price}}</td>
-          <td>R$ {{multiply this.product.price this.quantity}}</td>
-        </tr>
-      {{/each}}
-    </tbody>
-  </table>
-  <div>
-    <p>Total de Itens: {{totalQuantity}}</p>
-    <p>Preço Total: R$ {{totalPrice}}</p>
-  </div>
-  <a href="/" class="btn btn-primary">Continuar Comprando</a>
+     {{#each cart.products}}
+                <tr data-product-id="{{this.product._id}}">
+                    <td>
+                        <input type="checkbox" id="select-{{this.product._id}}" name="select-product" value="{{this.product._id}}">
+                        <label for="select-{{this.product._id}}" class="visually-hidden">Selecionar {{this.product.title}}</label>
+                    </td>
+                    <td>
+                       {{#if this.product.thumbnails.[0]}}
+                {{#each this.product.thumbnails}}
+               <img src="{{this}}" alt="{{../this.product.title}}" width="50">
+                {{/each}}
+                    {{else}}
+                   Imagem não disponível
+                   {{/if}}
+                    </td>
+                    <td>{{this.productId.title}}</td>
+                    <td>
+                        <label for="quantity-{{this.product._id}}" class="visually-hidden">Quantidade de {{this.product.title}}</label>
+                        <div class="d-flex align-items-center">
+                            <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="quantity-{{this.product._id}}"
+                                value="{{this.quantity}}"
+                                min="1"
+                                style="width: 60px;"
+                                onchange="updateQuantityInput('{{../cart._id}}', '{{this.product._id}}', this.value)"
+                            >
+                        </div>
+                    </td>
+                    <td>R$ {{this.productId.price}}</td>
+                    <td>R$ {{multiply this.product.price this.quantity}}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="removeFromCart('{{../cart._id}}', '{{this.product._id}}')">Excluir</button>
+                    </td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    <div>
+        <p>Preço Total: R$ {{totalPrice}}</p>
+    </div>
+    <a href="/" class="btn btn-primary">Continuar Comprando</a>
 {{else}}
-  <p>Seu carrinho está vazio.</p>
-  <a href="/" class="btn btn-primary">Continuar comprando</a>
+    <p>Seu carrinho está vazio.</p>
+    <a href="/" class="btn btn-primary">Continuar comprando</a>
 {{/if}}
+
+<div class="finalize-btn mt-3">
+    <a href="/checkout/{{cart._id}}" class="btn btn-success">Finalizar Compra</a>
+</div>
 <script>
-  async function updateQuantity(cartId, productId, quantity) {
-    try {
-      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ quantity })
-      });
+    async function addToCart(productId, quantity = 1) {
+        try {
+            const response = await fetch('/api/carts/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, quantity }),
+            });
 
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        const error = await response.json();
-        alert("Erro ao atualizar quantidade: " + error.message);
-      }
-    } catch (err) {
-      console.error("Erro inesperado:", err);
-      alert("Erro inesperado ao atualizar a quantidade.");
+            if (response.ok) {
+                const data = await response.json();
+                const totalQuantity = data.totalQuantity;
+
+                const cartQuantityElement = document.getElementById('cart-quantity');
+                if (cartQuantityElement) {
+                    cartQuantityElement.textContent = totalQuantity;
+                }
+                console.log('Produto adicionado ao carrinho!', data);
+                // Opcional: Mostrar feedback visual ao usuário (ex: um pequeno alerta)
+            } else {
+                const error = await response.json();
+                alert('Erro ao adicionar ao carrinho: ' + error.message);
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar ao carrinho:', error);
+            alert('Erro inesperado ao adicionar ao carrinho.');
+        }
     }
-  }
-  const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ quantity: 1 }) 
-});
 
-if (response.ok) {
-  alert("Produto adicionado ao carrinho!");
-} else {
-  const error = await response.json();
-  console.error("Erro ao adicionar ao carrinho:", error);
-  alert("Erro ao adicionar ao carrinho: " + error.message);
-}
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/api/carts/quantity'); // Rota para obter a quantidade inicial do carrinho
+            if (response.ok) {
+                const cartData = await response.json();
+                const totalQuantity = cartData.totalQuantity || 0;
+                const cartQuantityElement = document.getElementById('cart-quantity');
+                if (cartQuantityElement) {
+                    cartQuantityElement.textContent = totalQuantity;
+                }
+            } else {
+                console.error('Erro ao carregar quantidade do carrinho inicial.');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar quantidade do carrinho inicial:', error);
+        }
 
+        // Adicione event listeners aos botões "Comprar" dos seus produtos
+        const buyButtons = document.querySelectorAll('.botao-comprar'); // Use a classe ou seletor correto dos seus botões
+        buyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id'); // Assumindo que o ID do produto está neste atributo
+                addToCart(productId);
+            });
+        });
+    });
 </script>

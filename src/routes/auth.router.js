@@ -30,6 +30,7 @@ router.get(
   }
 );
 
+
 // Rotas de autenticação e registro
 router.post("/forgot-password", forgotPassword);
 router.post("/register", registerUser);
@@ -47,4 +48,7 @@ router.post("/reset-password/:token", // Atualizei para receber o token
   }),
   resetPassword
 );
+
+
+
 module.exports = router;

@@ -58,9 +58,57 @@ router.get('/githubcallback', passport.authenticate('github', { failureRedirect:
 });
 
 // Rota para renderizar a página de login
+// Rota de login - exibe o formulário de login (GET)
 router.get('/login', (req, res) => {
     console.log("Rota /login atingida.");
     res.render('login');
+});
+
+router.get('/api/auth/session', (req, res) => {
+    if (req.session.user) {
+        res.json({
+            loggedIn: true,
+            firstName: req.session.user.first_name,
+            email: req.session.user.email
+        });
+    } else {
+        res.json({ loggedIn: false });
+    }
+});
+
+// Rota de login - processa o envio do formulário (POST)
+router.post('/login', (req, res, next) => {
+    passport.authenticate('login', (err, user, info) => {
+        if (err) return next(err);
+        if (!user) {
+            console.error("🔥 Erro interno na autenticação:", err);
+            return next(err);
+        }
+
+        req.logIn(user, (err) => {
+            if (err) {
+                console.error("🔥 Erro ao logar o usuário:", err);
+                return next(err);
+            }
+
+            req.session.user = {
+                id: user._id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                email: user.email,
+                role: user.role,
+            };
+
+            console.log("✅ Login bem-sucedido! Salvando sessão...");
+            req.session.save((err) => {
+                if (err) {
+                    console.error("❌ Erro ao salvar sessão:", err);
+                    return next(err);
+                }
+                res.redirect('/');  // ✅ REDIRECIONA PARA A VIEW
+            });
+        });
+    })(req, res, next);
 });
 
 // Rota para falha no login

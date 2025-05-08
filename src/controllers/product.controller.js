@@ -3,7 +3,7 @@ const productRepository = require('../repositories/products.repository');
 const Cart = require("../models/cart.model"); // Importando o modelo de Cart
 const Product = require("../models/product.model");
 const productService = require('../services/productService'); 
-const productController = require('../controllers/product.controller');
+
 
 // Função para listar produtos com filtros, ordenação e paginação
 const getAllProducts = async (req, res) => {
@@ -26,9 +26,16 @@ const getAllProducts = async (req, res) => {
     }
   };
   
+// Criar produto (com imagem se enviada)
 const createProduct = async (req, res) => {
     try {
-        const newProduct = await productRepository.createProduct(req.body);
+        const imageUrl = req.file ? `/img/${req.file.filename}` : null;
+
+        const newProduct = await productRepository.createProduct({
+            ...req.body,
+            image: imageUrl // Salva o caminho da imagem no campo 'image'
+        });
+
         res.status(201).json(newProduct);
     } catch (error) {
         res.status(500).json({ message: 'Erro ao criar produto', error: error.message });
@@ -48,7 +55,7 @@ const deleteProduct = async (req, res) => {
 
 // Controlador para renderizar a página de adicionar produto (formulário)
 const renderAddProduct = (req, res) => {
-    res.render("addProduct"); // Certifique-se de que o arquivo `views/addProduct.handlebars` existe
+    res.render("addProduct"); 
 };
 
 // Controlador para renderizar a página de edição de produto
@@ -66,11 +73,17 @@ const renderEditProduct = async (req, res) => {
 };
 
 
-// Controlador para atualizar um produto existente
+// Atualizar produto (opcionalmente com nova imagem)
 const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedProduct = await productRepository.updateProduct(id, req.body);
+        const updatedData = req.body;
+
+        if (req.file) {
+            updatedData.imagePath = `/img/${req.file.filename}`;
+        }
+
+        const updatedProduct = await productRepository.updateProduct(id, updatedData);
 
         if (!updatedProduct) {
             return res.status(404).json({ message: "Produto não encontrado" });
@@ -80,7 +93,6 @@ const updateProduct = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 const renderProductsPage = async (req, res) => {
     try {
         if (!req.session.user) {
@@ -124,6 +136,7 @@ const renderProductsPage = async (req, res) => {
 
         const featuredProducts = await Product.find({ isFeatured: true }).lean();
         const products = await Product.find().lean();
+        console.log('---PRODUTOS AQUI---\n', products)
         const cartId = req.session.cartId; // Agora o cartId deve estar na sessão
         res.render('home', { featuredProducts, products, cartId });
         

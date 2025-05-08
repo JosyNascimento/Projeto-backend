@@ -1,3 +1,4 @@
+//passpor.config
 require('dotenv').config(); // Coloque no topo sempre
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;

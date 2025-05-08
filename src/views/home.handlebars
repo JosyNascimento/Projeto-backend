@@ -1,3 +1,4 @@
+
 <h1 class="text-center mt-4">Bem-vindo à Loja!</h1>
 
 <!-- Carrossel de Destaques -->
@@ -31,7 +32,7 @@
           <h5 class="card-title">{{this.title}}</h5>
           <p class="card-text">{{this.description}}</p>
           <p><strong>R$ {{this.price}}</strong></p>
-          <button onclick="addToCart('{{this._id}}', '{{../cartId}}')" class="btn btn-success">Comprar</button>
+          <button onclick="addToCart('{{this._id}}', '{{../cartId}}', '{{this.price}}')" class="btn btn-success">Comprar</button>
         </div>
       </div>
     </div>
@@ -61,7 +62,7 @@
 </nav>
 
 <script>
-  async function addToCart(productId, cartId) {
+  async function addToCart(productId, cartId, productPrice) {
     if (!cartId) {
       alert('Carrinho não encontrado. Faça login novamente.');
       return;
@@ -70,13 +71,13 @@
     try {
       const response = await fetch(`/api/carts/${cartId}/product/${productId}`, { // Corrigido o caminho da URL
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: 1 }) // Enviando a quantidade de 1 por padrão
+        headers: { 'Content-Type': 'text/html' },
+        body: JSON.stringify({ quantity: 1, price: productPrice }) // Enviando a quantidade de 1 por padrão
       });
 
       if (response.ok) {
         alert("Produto adicionado ao carrinho!");
-        window.location.href = `/carts/${cartId}`; // Direcionando para a página do carrinho
+        window.location.href = `/cart/${cartId}`; // Direcionando para a página do carrinho
       } else {
         const error = await response.json();
         alert("Erro ao adicionar ao carrinho: " + error.message);

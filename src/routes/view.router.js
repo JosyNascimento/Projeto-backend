@@ -13,14 +13,12 @@ const cartController = require('../controllers/cart.controller');
 console.log("viewController.getAllUsers:", viewController.getAllUsers);
 
 const {
-    renderHomePage,
-    renderLoginPage,
-    renderRegisterPage,
-    renderUpdateUserPage,
-    githubCallback,
-    renderProfile,
-    renderCarts,
-  
+  renderLoginPage,
+  renderRegisterPage,
+  renderUpdateUserPage,
+  githubCallback,
+  renderProfile,
+  renderCarts,
 } = require("../controllers/view.controller");
 
 router.get('/realtimeproducts', adminMiddleware, (req, res) => {
@@ -33,11 +31,12 @@ router.get("/teste", (req, res) => {
 router.get('/reset-password', (req, res) => {
     res.render('forgotPassword', { title: 'Esqueci a Senha' }); 
   });
-router.get('/cart', cartController.renderCart);
-router.post('/cart/add', cartController.addProductToCart);
+//router.get('/carts', cartController.renderCarts);
+//router.post('/carts/add', cartController.addProductToCart);
 router.get("/", productController.getHomePage);
-
+router.get('/cart', renderCarts);
 router.get("/login", renderLoginPage);
+router.get('/cart/:cartId', renderCarts);
 //router.get('/forgot-password', viewController.renderForgotPassword);
 router.get('/forgot-password-info', (req, res) => {
     res.render('forgotPasswordSuccess', { title: 'Link Enviado' });

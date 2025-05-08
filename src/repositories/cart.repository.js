@@ -5,7 +5,7 @@ const Product = require('../models/product.model');
 class CartRepository {
     async getCartById(id) {
         try {
-            return await Cart.findById(id).populate('products.product');
+            return await Cart.findById(id).populate('products.productId');
         } catch (error) {
             console.error('Erro ao buscar carrinho por ID:', error);
             throw error;
@@ -34,7 +34,7 @@ class CartRepository {
 
     async updateCart(id, cartData) {
         try {
-            return await Cart.findByIdAndUpdate(id, cartData, { new: true }).populate('products.product');
+            return await Cart.findByIdAndUpdate(id, cartData, { new: true }).populate('products.productId');
         } catch (error) {
             console.error('Erro ao atualizar carrinho:', error);
             throw error;
@@ -103,7 +103,7 @@ class CartRepository {
 
     async getCartTotal(cartId) {
         try {
-            const cart = await Cart.findById(cartId).populate('products.product');
+            const cart = await Cart.findById(cartId).populate('products.productId');
             if (!cart) {
                 throw new Error('Carrinho não encontrado');
             }
@@ -121,23 +121,28 @@ class CartRepository {
 
     async calculateCartTotals(cartId) {
         try {
-            const cart = await Cart.findById(cartId).populate('products.product');
+            const cart = await Cart.findById(cartId).populate('products.productId'); // POPULATE aqui!
             if (!cart) {
                 throw new Error('Carrinho não encontrado');
             }
-
+    
             let totalQuantity = 0;
             let totalPrice = 0;
+    
             for (const item of cart.products) {
-                totalQuantity += item.quantity;
-                totalPrice += item.product.price * item.quantity;
+                if (item.productId) {
+                    totalQuantity += item.quantity;
+                    totalPrice += Number(item.productId.price || 0) * item.quantity;
+                }
             }
+    
             return { totalQuantity, totalPrice };
         } catch (error) {
             console.error('Erro ao calcular totais do carrinho:', error);
             throw error;
         }
     }
+    
 
     async updateCartProductQuantity(cartId, productId, quantity) {
         try {

@@ -96,6 +96,17 @@ body, html {
   color: #fcfbf8;
   margin-left: 3rem;
 }
+.cart-badge {
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7em;
+  padding: 2px 5px;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+}
+
 .fav-icon:hover {
   color: red; /* Define a cor vermelha ao passar o mouse */
 }

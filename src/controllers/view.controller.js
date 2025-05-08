@@ -3,7 +3,8 @@ const userModel = require("../models/user.model");
 const jwt = require('jsonwebtoken');
 const Product = require('../models/product.model');
 console.log("view.controller carregado!");
-
+const CartRepository = require('../repositories/cart.repository');
+const cartRepository = new CartRepository();
 const renderHomePage = async (req, res) => {
   const token = req.cookies.token;
   try {
@@ -12,6 +13,8 @@ const renderHomePage = async (req, res) => {
     
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await userModel.findById(decoded._id);
+      cartId = user.cart || null; // Se houver um carrinho associado ao usuário
       res.render('home', { title: 'Home', user: decoded, products });
     } else {
       res.render('home', { title: 'Home', user: null, products });
@@ -22,6 +25,29 @@ const renderHomePage = async (req, res) => {
   }
 };
 
+const renderCarts = async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+
+        //const userId = req.session.user.id;
+        const cartId = req.params.cartId;
+        const cart = await cartRepository.getCartById(cartId);
+        console.log('---CARRINHO AQUI---\n', cart)
+        if (cart) {
+            const { totalQuantity, totalPrice } = await cartRepository.calculateCartTotals(cartId);
+            console.log("Dados do carrinho:", cart, totalQuantity, totalPrice); 
+            return res.render('cart', { title: 'Carrinho', cart, totalQuantity, totalPrice });
+        } else {
+            console.log("Carrinho vazio"); 
+            return res.render('cart', { title: 'Carrinho', cart: { products: [] }, totalQuantity: 0, totalPrice: 0 });
+        }
+    } catch (error) {
+        console.error('Erro ao renderizar carrinho:', error);
+        res.status(500).send('Erro ao carregar carrinho');
+    }
+};
 
 const renderRegisterPage = (req, res) => {
     res.render("register");
@@ -83,4 +109,5 @@ module.exports = {
     renderResetPassword,
     renderForgotPassword,
     renderResetPassword,
+    renderCarts,
    };

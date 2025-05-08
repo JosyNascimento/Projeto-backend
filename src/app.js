@@ -10,9 +10,11 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
 const chatRouter = require("./routes/chat.router");
+const cartQuantityRoutes = require('./routes/api/quantity');
 const realTimeProductsRouter = require('./routes/realTimeProducts.router');
-const productsApiRouter = require("./routes/api/apiProduct.router");
+const productsApiRouter = require("./routes/api/Product.router");
 const productRouter = require("./routes/products.router");
+const paymentRouter = require('./routes/payment.router');
 const passport = require("./config/passport.config");
 const mongoStore = require("connect-mongo");
 const viewRouter = require("./routes/view.router");
@@ -22,7 +24,8 @@ const cartRouter = require("./routes/cart.router");
 const authRouter = require("./routes/auth.router");
 const setupWebSocket = require("./websocket/websocket");
 const sessionRouter = require("./routes/session.router");
-const { autenticacao } = require("./middlewares/auth.middleware");
+const authApiRouter = require('./routes/api/auth.router');
+const multer = require('multer');
 const session = require("express-session");
 const connectDB = require("./config/connectDB");
 const methodOverride = require("method-override");
@@ -63,22 +66,18 @@ app.engine(
       allowProtoMethodsByDefault: true,
     },
     helpers: {
-      or: function (a, b) {
-        return a || b;
-      },
-      eq: function (a, b) {
-        return a === b;
-      },
-      isAdmin: function (user) {
-        return user && user.role === "admin";
-      },
+      or: function (a, b) { return a || b; },
+      eq: function (a, b) { return a === b; },
+      isAdmin: function (user) { return user && user.role === "admin"; },
       ifEquals: function (arg1, arg2, options) {
         return arg1 == arg2 ? options.fn(this) : options.inverse(this);
       },
-      multiply: handlebarsUtils.helpers.multiply,
-    },
+      multiply: handlebarsUtils.helpers.multiply, // <-- AQUI!
+    }
   })
-);
+);    
+
+
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
@@ -87,6 +86,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
+app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
+
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -113,6 +114,36 @@ console.log("Passport inicializado.");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// ✅ Configuração do Multer (antes da rota de upload)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'public', 'img')); // Pasta para salvar as imagens
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/upload', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('Nenhum arquivo de imagem foi enviado.');
+  }
+
+  // `req.file` contém informações sobre o arquivo enviado
+  console.log('Arquivo recebido:', req.file);
+
+  // O caminho do arquivo salvo agora estará dentro de public/img
+  const imagePath = `/img/${req.file.filename}`; // Caminho para salvar no banco de dados
+
+  // Aqui você salvaria `imagePath` no seu documento do MongoDB associado
+  // ao item que está sendo criado ou atualizado.
+
+  res.send('Arquivo de imagem enviado com sucesso. Caminho: ' + imagePath);
+});
+
 // ✅ Rotas organizadas
 app.use("/view", viewRouter);
 app.use("/api/sessions", sessionRouter);
@@ -120,16 +151,19 @@ app.use("/api/products", productsApiRouter);
 app.use("/", seedRouter);
 app.use("/", sessionRouter);
 app.use("/", authRouter);
+app.use("/api/auth", authApiRouter);
 app.use("/", viewRouter);
 app.use("/", userRouter);
 app.use("/", chatRouter);
-app.use("/cart", cartRouter);
+app.use("/api/carts", cartRouter);
+app.use('/api/cart', cartQuantityRoutes);
 app.use("/products", productRouter);
 app.use('/', realTimeProductsRouter);
 app.use("/addProduct", productRouter); 
 app.use("/deleteProduct", productRouter); 
 app.use("/test", testRouter);
 app.use("/checkout", checkoutRouter);
+app.use('/api/payments', paymentRouter);
 app.use(cors());
 
 // Configuração do Swagger
@@ -160,16 +194,11 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Middleware de erro global
-app.use((err, req, res, next) => {
-    console.error(err); // Log the error to the console
-    res.status(500).json({ message: "Erro interno do servidor", error: err.message });
-  });
+
 
 app.use((err, req, res, next) => {
   console.error("🔥 ERRO DETECTADO:", err.stack || err);
-  res
-    .status(500)
-    .json({ message: "Erro interno do servidor", error: err.message });
+  res.status(500).json({ message: "Erro interno do servidor", error: err.message });
 });
 
 const PORT = process.env.PORT || 8080;

@@ -14,7 +14,11 @@
       <label for="password">Senha:</label>
       <input type="password" id="password" name="password" required aria-label="Digite sua senha">
 
-      <button type="submit" aria-label="Entrar no sistema">Entrar</button>
+      <form method="POST" action="/login" id="login-form">
+    <!-- campos -->
+    <button type="submit" aria-label="Entrar no sistema">Entrar</button>
+</form>
+
       <a href="/forgot-password-info">Esqueci senha</a>
     </form>
 
@@ -32,14 +36,15 @@
     const message = params.get('message');
 
 
-
-    // Exibe o alerta com SweetAlert
-    Swal.fire({
-      icon: ['Usuário registrado com sucesso', 'Senha redefinida com sucesso'].includes(message) ? 'success' : 'error',
-      title: ['Usuário registrado com sucesso', 'Senha redefinida com sucesso'].includes(message) ? 'Sucesso' : 'Erro',
-      text: message,
-      confirmButtonText: 'OK'
-    });
+// Exibe o alerta com SweetAlert
+   if (message) {
+  Swal.fire({
+    icon: ['Usuário registrado com sucesso', 'Senha redefinida com sucesso'].includes(message) ? 'success' : 'error',
+    title: ['Usuário registrado com sucesso', 'Senha redefinida com sucesso'].includes(message) ? 'Sucesso' : 'Erro',
+    text: message,
+    confirmButtonText: 'OK'
+  });
+}
 
     // Remove o parâmetro da URL
     const newUrl = window.location.pathname;
@@ -60,6 +65,8 @@
     const newUrl = window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
   }
+
+  
 </script>
 
 <style>
@@ -85,7 +92,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(46, 3, 26, 0.815);
     width: 300px;
-    max-width: 90%; /* Ajuste para telas menores */
+    max-width: 500px;
   }
 
 .login-card a:hover {

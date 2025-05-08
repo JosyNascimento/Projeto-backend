@@ -1,4 +1,4 @@
-// 
+// entregaParcial3/src/config/connectDB.js
 const mongoose = require('mongoose');
 
 // Habilita os logs do Mongoose

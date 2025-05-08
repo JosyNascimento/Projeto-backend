@@ -30,41 +30,32 @@ const handleGithubCallback = (req, res) => {
 
 // Login via formulário
 const loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        console.log("Tentativa de login:", email);
+  const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+  try {
+      const user = await User.findOne({ email });
 
-        if (!user) {
-            console.log("Usuário não encontrado:", email);
-            return res.status(400).json({ message: "Usuário não encontrado" });
-        }
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+          return res.status(401).render('login', { error: 'Credenciais inválidas.' }); // Ou envie um JSON de erro
+      }
 
-        const isValid = await user.comparePassword(password);
-        if (!isValid) {
-            console.log("Senha inválida:", email);
-            return res.status(400).json({ message: "Senha inválida" });
-        }
+      req.session.user = {
+          id: user._id,
+          first_name: user.firstName,
+          // ... outras informações do usuário que você quer na sessão
+      };
+      req.session.save(err => {
+          if (err) {
+              console.error('Erro ao salvar sessão:', err);
+              return res.status(500).send('Erro ao salvar sessão.');
+          }
+          res.redirect('/'); // Redirecione para a página inicial ou outra página desejada
+      });
 
-        const token = generateToken({ id: user._id, role: user.role, email: user.email });
-
-        req.session.user = {
-            id: user._id,
-            first_name: user.first_name || "Nome não disponível",
-            last_name: user.last_name,
-            email: user.email,
-            role: user.role,
-        };
-
-        console.log("🟢 Login bem-sucedido:", req.session.user);
-
-        res.cookie('token', token, { httpOnly: true });
-        res.redirect('/profile');
-    } catch (error) {
-        console.error("Erro ao fazer login:", error);
-        res.status(500).json({ message: "Erro interno no servidor" });
-    }
+  } catch (error) {
+      console.error('Erro durante o login:', error);
+      res.status(500).send('Erro interno do servidor.');
+  }
 };
 
 const failResetPassword = (req, res) => {
@@ -216,6 +207,15 @@ function isUser(req, res, next) {
   }
 }
 
+const getSessionInfo = (req, res) => {
+  if (req.session.user) {
+      return res.json({ loggedIn: true, firstName: req.session.user.first_name });
+  } else {
+      return res.json({ loggedIn: false });
+  }
+};
+
+
 module.exports = {
   renderLoginPage,
   forgotPassword,
@@ -232,4 +232,6 @@ module.exports = {
   logoutUser,
   autenticacao,
   isUser,
+  getSessionInfo,
+   
 };

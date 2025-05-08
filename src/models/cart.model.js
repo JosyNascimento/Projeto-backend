@@ -6,13 +6,14 @@ const cartSchema = new mongoose.Schema({
         {
             productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
             quantity: { type: Number, required: true },
+            price: { type: String, required: false },
         },
     ],
     
 }, { timestamps: true });
 
 cartSchema.virtual('totalPrice').get(function() {
-    return this.products.reduce((acc, item) => acc + item.quantity * item.product.price, 0);
+    return this.products.reduce((acc, item) => acc + item.quantity * item.productId.price, 0);
   });
   
 const Cart = mongoose.model('Cart', cartSchema);
