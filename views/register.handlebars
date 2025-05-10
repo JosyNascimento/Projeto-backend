@@ -1,0 +1,33 @@
+<div class="welcome-message text-center my-4">
+  <h2>Bem-vindo!</h2>
+  <p>Faça o seu registro para continuar.</p>
+</div>
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+  <div class="profile-card p-4 shadow-lg bg-white rounded">
+    <h1 class="text-center mb-4 text-success">Registro de Usuário</h1>
+    <form action="/register" method="POST" class="profile-form">
+      <div class="mb-3">
+        <label for="first_name" class="form-label">Primeiro Nome:</label>
+        <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Digite seu primeiro nome" required>
+      </div>
+      <div class="mb-3">
+        <label for="last_name" class="form-label">Segundo Nome:</label>
+        <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Digite seu segundo nome" required>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">E-mail:</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="Digite seu e-mail" required>
+      </div>
+      <div class="mb-3">
+        <label for="age" class="form-label">Idade:</label>
+        <input type="number" id="age" name="age" class="form-control" placeholder="Digite sua idade" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Senha:</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Crie uma senha" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Registrar</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,175 @@
+{{#if cart.products.length}}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Selecionar</th>
+                <th>Imagem</th>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each cart.products}}
+                <tr data-product-id="{{this.productId._id}}">
+                    <td>
+                        <input type="checkbox" id="select-{{this.productId._id}}" name="select-product" value="{{this.productId._id}}">
+                        <label for="select-{{this.productId._id}}" class="visually-hidden">Selecionar {{this.productId.title}}</label>
+                    </td>
+                    <td>
+                        {{#if this.productId.thumbnails}}
+                            <img src="{{this.productId.thumbnails.[0]}}" alt="{{this.productId.title}}" width="50">
+                        {{else}}
+                            <img src="/images.jpg" class="d-block w-100" alt="{{this.productId.title}}" width="50">
+                        {{/if}}
+                    </td>
+                    <td>{{this.productId.title}}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="quantity-{{this.productId._id}}"
+                                value="{{this.quantity}}"
+                                min="1"
+                                style="width: 60px;"
+                                onchange="updateQuantityInput('{{../cart._id}}', '{{this.productId._id}}', this.value)"
+                            >
+                        </div>
+                    </td>
+                    <td>R$ {{this.productId.price}}</td>
+                    <td>R$ {{multiply this.productId.price this.quantity}}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="removeFromCart('{{../cart._id}}', '{{this.productId._id}}')">Excluir</button>
+                    </td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <div>
+        <p>Preço Total: R$ {{totalPrice}}</p>
+        <p>Quantidade de Produtos: {{totalQuantity}}</p>
+    </div>
+
+    <div class="finalize-btn mt-3">
+        <a href="/checkout/{{cart._id}}" class="btn btn-primary">Finalizar Compra</a>
+
+        <a href="/carts/clear/{{cart._id}}" class="btn btn-danger">Limpar Carrinho</a>
+        <a href="/" class="btn btn-primary">Continuar Comprando</a>
+    </div>
+{{else}}
+    <p>Seu carrinho está vazio.</p>
+    <a href="/" class="btn btn-primary">Continuar comprando</a>
+{{/if}}
+
+<script>
+    async function addToCart(productId, quantity = 1) {
+        try {
+            const response = await fetch('/carts/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, quantity }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const totalQuantity = data.totalQuantity;
+
+                const cartQuantityElement = document.getElementById('cart-quantity');
+                if (cartQuantityElement) {
+                    cartQuantityElement.textContent = totalQuantity;
+                }
+                console.log('Produto adicionado ao carrinho!', data);
+                // Opcional: Mostrar feedback visual ao usuário (ex: um pequeno alerta)
+            } else {
+                const error = await response.json();
+                alert('Erro ao adicionar ao carrinho: ' + error.message);
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar ao carrinho:', error);
+            alert('Erro inesperado ao adicionar ao carrinho.');
+        }
+    }
+
+    async function removeFromCart(cartId, productId) {
+        try {
+            const response = await fetch(`/carts/${cartId}/product/${productId}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                console.log('Produto removido do carrinho!');
+                // Recarregue a página para atualizar a exibição do carrinho
+                window.location.reload();
+                // Ou, se preferir uma atualização mais dinâmica sem recarregar:
+                // const productRow = document.querySelector(`tr[data-product-id="${productId}"]`);
+                // if (productRow) {
+                //     productRow.remove();
+                //     // Recalcular e atualizar o preço total e a quantidade total
+                //     updateCartSummary(cartId); // Você precisaria implementar esta função
+                // }
+            } else {
+                const error = await response.json();
+                alert('Erro ao remover o produto do carrinho: ' + error.message);
+            }
+        } catch (error) {
+            console.error('Erro ao remover o produto do carrinho:', error);
+            alert('Erro inesperado ao remover o produto do carrinho.');
+        }
+    }
+
+async function updateQuantityInput(cartId, productId, newQuantity) {
+    try {
+        const response = await fetch(`/carts/${cartId}/product/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ quantity: parseInt(newQuantity, 10) }),
+        });
+
+        if (response.ok) {
+            console.log('Quantidade atualizada com sucesso!');
+            window.location.reload(); // Ou atualize o total dinamicamente, se preferir
+        } else {
+            const error = await response.json();
+            alert('Erro ao atualizar a quantidade: ' + error.message);
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar a quantidade:', error);
+        alert('Erro inesperado ao atualizar a quantidade.');
+    }
+}
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/carts/quantity'); // Rota para obter a quantidade inicial do carrinho
+            if (response.ok) {
+                const cartData = await response.json();
+                const totalQuantity = cartData.totalQuantity || 0;
+                const cartQuantityElement = document.getElementById('cart-quantity');
+                if (cartQuantityElement) {
+                    cartQuantityElement.textContent = totalQuantity;
+                }
+            } else {
+                console.error('Erro ao carregar quantidade do carrinho inicial.');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar quantidade do carrinho inicial:', error);
+        }
+
+        // Adicione event listeners aos botões "Comprar" dos seus produtos
+        const buyButtons = document.querySelectorAll('.botao-comprar'); // Use a classe ou seletor correto dos seus botões
+        buyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id'); // Assumindo que o ID do produto está neste atributo
+                addToCart(productId);
+            });
+        });
+    });
+</script>

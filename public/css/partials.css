@@ -1,0 +1,42 @@
+/* public/css/style.css */
+/* Outros estilos da sua aplicação podem estar aqui */
+
+footer {
+    background-color: #868383;
+    color: #50062f;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-content p {
+    font-size: 40px;
+    margin: 0;
+}
+
+.footer-content nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+.footer-content nav ul li {
+    margin-left: 20px;
+}
+
+.footer-content nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-content nav ul li a:hover {
+    text-decoration: underline;
+}

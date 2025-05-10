@@ -1,0 +1,28 @@
+<div>
+  <h1>Chat</h1>
+  <form id="chatForm">
+    <input type="text" id="user" placeholder="Seu email" required />
+    <textarea id="message" placeholder="Sua mensagem" required></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+  <ul id="messages"></ul>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  document.getElementById('chatForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const user = document.getElementById('user').value;
+    const message = document.getElementById('message').value;
+    socket.emit('newMessage', { user, message });
+  });
+
+  socket.on('messageHistory', (messages) => {
+    const messagesList = document.getElementById('messages');
+    messagesList.innerHTML = messages
+      .map((msg) => `<li><strong>${msg.user}:</strong> ${msg.message}</li>`)
+      .join('');
+  });
+</script>

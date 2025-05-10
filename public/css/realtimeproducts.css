@@ -1,0 +1,116 @@
+/* Estilos gerais */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Estilo para o título */
+  h1, h2 {
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Estilos do formulário de adicionar produtos */
+  .form-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin: 20px auto;
+  }
+  
+  .form-container input, .form-container button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .form-container button {
+    background-color: #3f79d1;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .form-container button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Estilo para a lista de produtos */
+  .product-list-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  #productList {
+    list-style: none;
+    padding: 0;
+  }
+  
+  #productList li {
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Div para os detalhes do produto e botões */
+  .product-info {
+    flex-grow: 1; /* Faz com que a área de detalhes ocupe o espaço disponível */
+  }
+  
+  #productList li strong {
+    font-size: 18px;
+    color: #333;
+  }
+  
+  #productList li span {
+    font-size: 14px;
+    color: #777;
+  }
+  
+  /* Botões de deletar e editar */
+  #productList button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  #productList button:hover {
+    background-color: #e53935;
+  }
+  
+  #productList button:nth-child(2) {
+    background-color: #FFC107;
+  }
+  
+  #productList button:nth-child(2):hover {
+    background-color: #ffb300;
+  }
+  
+  #productList li button {
+    margin-left: 10px;
+  }
+  

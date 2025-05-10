@@ -1,0 +1,76 @@
+paths:
+  /api/sessions/login:
+    post:
+      tags:
+        - Sessions
+      summary: Login de usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Login bem-sucedido
+        '401':
+          description: Credenciais inválidas
+
+  /api/sessions/logout:
+    post:
+      tags:
+        - Sessions
+      summary: Logout do usuário
+      responses:
+        '200':
+          description: Logout bem-sucedido
+        '400':
+          description: Erro ao realizar logout
+
+  /api/sessions/register:
+    post:
+      tags:
+        - Sessions
+      summary: Registro de novo usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: "João"
+                lastName:
+                  type: string
+                  example: "Silva"
+                email:
+                  type: string
+                  example: "joao@example.com"
+                password:
+                  type: string
+                  example: "123456"
+      responses:
+        '201':
+          description: Usuário registrado com sucesso
+        '400':
+          description: Erro no registro
+
+  /api/sessions/current:
+    get:
+      tags:
+        - Sessions
+      summary: Obter o usuário atual autenticado
+      responses:
+        '200':
+          description: Usuário retornado com sucesso
+        '401':
+          description: Não autenticado

@@ -1,0 +1,30 @@
+<h1>Pagamento realizado com sucesso!</h1>
+{{#if ticket}}
+  <h2>Detalhes do seu pedido:</h2>
+  <p><strong>Código do Ticket:</strong> {{ticket.code}}</p>
+  <p><strong>Data:</strong> {{ticket.purchase_datetime}}</p>
+  <p><strong>Total:</strong> R$ {{ticket.amount}}</p>
+
+  <h3>Produtos:</h3>
+  <ul>
+    {{#each ticket.products}}
+      <li>
+        {{this.product.title}} – {{this.quantity}} x R$ {{this.product.price}} = R$ {{multiply this.quantity this.product.price}}
+      </li>
+    {{/each}}
+  </ul>
+{{else}}
+  <p>Não foi possível encontrar o ticket.</p>
+{{/if}}
+{{#if ticket.purchase_datetime}}
+  <p><strong>Data:</strong> {{formatDate ticket.purchase_datetime}}</p>
+{{/if}}
+{{#if ticket.purchase_datetime}}
+  <p><strong>Data:</strong> {{formatDate ticket.purchase_datetime}}</p>
+{{/if}}
+
+<p><strong>Total da compra:</strong> R$ {{multiply ticket.totalQuantity ticket.totalPrice}}</p>
+
+
+<p>Obrigado pela sua compra. Em breve você receberá seu produto.</p>
+<a href="/">Voltar à Home</a>

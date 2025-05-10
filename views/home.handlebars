@@ -1,0 +1,85 @@
+<h1 class="text-center mt-4">Bem-vindo à Loja!</h1>
+
+<div id="carouselExampleIndicators" class="carousel slide mb-5" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    {{#each featuredProducts}}
+      <div class="carousel-item {{#if @first}}active{{/if}}">
+        <img src="{{#if this.thumbnails}}{{'/images/'}}{{this.thumbnails.[0]}}{{else}}/images.jpg{{/if}}" class="d-block w-100" alt="{{this.title}}">
+        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+          <h5>{{this.title}}</h5>
+          <p>{{this.description}}</p>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {{#each products}}
+    <div class="col">
+      <div class="card h-100">
+        <img src="{{#if this.thumbnails}}{{'/images/'}}{{this.thumbnails.[0]}}{{else}}/images.jpg{{/if}}" class="d-block w-100" alt="{{this.title}}">
+        <div class="card-body">
+          <h5 class="card-title">{{this.title}}</h5>
+          <p class="card-text">{{this.description}}</p>
+          <p><strong>R$ {{this.price}}</strong></p>
+          <button onclick="addToCart('{{this._id}}', '{{../cartId}}', '{{this.price}}')" class="btn btn-success">Comprar</button>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+<nav class="mt-5">
+  <ul class="pagination justify-content-center">
+    {{#if hasPrevPage}}
+      <li class="page-item">
+        <a class="page-link" href="?page={{prevPage}}&search={{search}}">Anterior</a>
+      </li>
+    {{/if}}
+
+    <li class="page-item active">
+      <span class="page-link">{{page}}</span>
+    </li>
+
+    {{#if hasNextPage}}
+      <li class="page-item">
+        <a class="page-link" href="?page={{nextPage}}&search={{search}}">Próxima</a>
+      </li>
+    {{/if}}
+  </ul>
+</nav>
+
+<script>
+  async function addToCart(productId, cartId, productPrice) {
+    if (!cartId) {
+      alert('Carrinho não encontrado. Faça login novamente.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/html' },
+        body: JSON.stringify({ quantity: 1, price: productPrice }) 
+      });
+
+      if (response.ok) {
+        alert("Produto adicionado ao carrinho!");
+        window.location.href = `/cart/${cartId}`; 
+      } else {
+        const error = await response.json();
+        alert("Erro ao adicionar ao carrinho: " + error.message);
+      }
+    } catch (err) {
+      console.error("Erro inesperado:", err);
+      alert("Erro inesperado ao adicionar ao carrinho.");
+    }
+  }
+</script>

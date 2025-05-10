@@ -1,0 +1,38 @@
+<!-- checkout.handlebars -->
+<h1 class="text-center mt-4">Finalizar Compra</h1>
+
+<div class="checkout-details">
+  <h2>Detalhes do Carrinho</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Quantidade</th>
+        <th>Preço Unitário</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each cart.products}}
+        <tr>
+          <td>{{this.product.title}}</td>
+          <td>{{this.quantity}}</td>
+          <td>R$ {{this.product.price}}</td>
+          <td>R$ {{this.product.price * this.quantity}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="total-value">
+    <h3>Total: R$ {{totalPrice}}</h3>
+  </div>
+
+  <!-- Formulário de pagamento ou envio -->
+  <div>
+    <form action="/finalize-payment/{{cart._id}}" method="POST">
+    <button type="submit" class="btn btn-success">Finalizar Pagamento</button>
+</form>
+
+  </div>
+</div>
