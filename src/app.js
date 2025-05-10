@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
 const chatRouter = require("./routes/chat.router");
-const cartQuantityRoutes = require('./routes/api/quantity');
+
 const realTimeProductsRouter = require('./routes/realTimeProducts.router');
 const productsApiRouter = require("./routes/api/Product.router");
 const productRouter = require("./routes/products.router");
@@ -114,35 +114,6 @@ console.log("Passport inicializado.");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ✅ Configuração do Multer (antes da rota de upload)
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, 'public', 'img')); // Pasta para salvar as imagens
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage: storage });
-
-app.post('/upload', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('Nenhum arquivo de imagem foi enviado.');
-  }
-
-  // `req.file` contém informações sobre o arquivo enviado
-  console.log('Arquivo recebido:', req.file);
-
-  // O caminho do arquivo salvo agora estará dentro de public/img
-  const imagePath = `/img/${req.file.filename}`; // Caminho para salvar no banco de dados
-
-  // Aqui você salvaria `imagePath` no seu documento do MongoDB associado
-  // ao item que está sendo criado ou atualizado.
-
-  res.send('Arquivo de imagem enviado com sucesso. Caminho: ' + imagePath);
-});
 
 // ✅ Rotas organizadas
 app.use("/view", viewRouter);
@@ -156,7 +127,7 @@ app.use("/", viewRouter);
 app.use("/", userRouter);
 app.use("/", chatRouter);
 app.use("/api/carts", cartRouter);
-app.use('/api/cart', cartQuantityRoutes);
+
 app.use("/products", productRouter);
 app.use('/', realTimeProductsRouter);
 app.use("/addProduct", productRouter); 

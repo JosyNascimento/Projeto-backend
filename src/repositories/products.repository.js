@@ -67,7 +67,6 @@ class ProductRepository {
         }
     }
 
-    // Adicione outros métodos conforme necessário
 }
 
 module.exports = new ProductRepository();

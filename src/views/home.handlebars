@@ -1,12 +1,10 @@
-
 <h1 class="text-center mt-4">Bem-vindo à Loja!</h1>
 
-<!-- Carrossel de Destaques -->
 <div id="carouselExampleIndicators" class="carousel slide mb-5" data-bs-ride="carousel">
   <div class="carousel-inner">
     {{#each featuredProducts}}
       <div class="carousel-item {{#if @first}}active{{/if}}">
-        <img src="{{this.thumbnails.[0]}}" class="d-block w-100" alt="{{this.title}}">
+        <img src="{{#if this.thumbnails}}{{'/images/'}}{{this.thumbnails.[0]}}{{else}}/images.jpg{{/if}}" class="d-block w-100" alt="{{this.title}}">
         <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
           <h5>{{this.title}}</h5>
           <p>{{this.description}}</p>
@@ -22,12 +20,11 @@
   </button>
 </div>
 
-<!-- Produtos -->
 <div class="row row-cols-1 row-cols-md-3 g-4">
   {{#each products}}
     <div class="col">
       <div class="card h-100">
-        <img src="{{this.thumbnails.[0]}}" class="card-img-top" alt="{{this.title}}">
+        <img src="{{#if this.thumbnails}}{{'/images/'}}{{this.thumbnails.[0]}}{{else}}/images.jpg{{/if}}" class="d-block w-100" alt="{{this.title}}">
         <div class="card-body">
           <h5 class="card-title">{{this.title}}</h5>
           <p class="card-text">{{this.description}}</p>
@@ -39,8 +36,6 @@
   {{/each}}
 </div>
 
-
-<!-- Paginação -->
 <nav class="mt-5">
   <ul class="pagination justify-content-center">
     {{#if hasPrevPage}}
@@ -69,15 +64,15 @@
     }
 
     try {
-      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, { // Corrigido o caminho da URL
+      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'text/html' },
-        body: JSON.stringify({ quantity: 1, price: productPrice }) // Enviando a quantidade de 1 por padrão
+        body: JSON.stringify({ quantity: 1, price: productPrice }) 
       });
 
       if (response.ok) {
         alert("Produto adicionado ao carrinho!");
-        window.location.href = `/cart/${cartId}`; // Direcionando para a página do carrinho
+        window.location.href = `/cart/${cartId}`; 
       } else {
         const error = await response.json();
         alert("Erro ao adicionar ao carrinho: " + error.message);
@@ -87,5 +82,4 @@
       alert("Erro inesperado ao adicionar ao carrinho.");
     }
   }
-</script>                                                                                                                                                 e no carrinha apareça o produto a imagem o valor individual de cada produto e o valor total da comprar e ao clicar no botão finalizar compra seja direcionada para a pagina de checkout 
-
+</script>

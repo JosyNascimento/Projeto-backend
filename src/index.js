@@ -1,14 +1,14 @@
-// index.js (projeto mínimo)
-const express = require('express');
-const app = express();
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './app';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-const renderUserList = async (req, res) => {
-  console.log('renderUserList chamado!');
-  res.send('Lista de usuários simples');
-};
-
-app.get('/users', renderUserList);
-
-app.listen(3000, () => {
-  console.log('Servidor rodando na porta 3000');
-});
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <Router>
+      <App />
+    </Router>
+  </React.StrictMode>
+);

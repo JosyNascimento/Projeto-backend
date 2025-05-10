@@ -37,6 +37,7 @@ router.get("/", productController.getHomePage);
 router.get('/cart', renderCarts);
 router.get("/login", renderLoginPage);
 router.get('/cart/:cartId', renderCarts);
+
 //router.get('/forgot-password', viewController.renderForgotPassword);
 router.get('/forgot-password-info', (req, res) => {
     res.render('forgotPasswordSuccess', { title: 'Link Enviado' });
@@ -57,5 +58,6 @@ router.get("/updateUser/:email", renderUpdateUserPage);
 router.get("/produtos", productController.renderProductsPage);
 router.get("/profile",  renderProfile);
 router.get('/github/callback', githubCallback);
+router.get('/checkout/:cid', viewController.renderCheckout);
 
 module.exports = router;

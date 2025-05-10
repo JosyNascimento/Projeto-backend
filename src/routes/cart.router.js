@@ -7,7 +7,7 @@ const { authorizationMiddleware } = require("../middlewares/auth.middleware");
 
 // Rota para adicionar produto ao carrinho de usuário não logado (usa cartId da sessão)
 router.post('/:cartId/product/:productId', cartController.addProductToCartByCartId);
-
+router.get("/cart/:cid", cartController.getCartById); 
 // Rota para buscar o carrinho do usuário logado
 //router.get("/me", authorizationMiddleware("user"), cartController.getUserCart);
 

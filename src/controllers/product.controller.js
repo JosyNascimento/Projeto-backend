@@ -29,19 +29,30 @@ const getAllProducts = async (req, res) => {
 // Criar produto (com imagem se enviada)
 const createProduct = async (req, res) => {
     try {
-        const imageUrl = req.file ? `/img/${req.file.filename}` : null;
-
-        const newProduct = await productRepository.createProduct({
-            ...req.body,
-            image: imageUrl // Salva o caminho da imagem no campo 'image'
-        });
-
-        res.status(201).json(newProduct);
+      const { title, description, price, code, stock, category } = req.body;
+  
+      let thumbnails = [];
+      if (req.file) {
+        thumbnails.push(`/images/${req.file.filename}`);
+      }
+  
+      const newProduct = {
+        title,
+        description,
+        price,
+        code,
+        stock,
+        category,
+        thumbnails: thumbnails 
+      };
+  
+      await productService.createProduct(newProduct);
+      res.redirect('/add');
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao criar produto', error: error.message });
+      console.error('Erro ao criar produto:', error);
+      res.status(500).send('Erro ao criar produto');
     }
-};
-
+  };
 // Controlador para excluir um produto
 const deleteProduct = async (req, res) => {
     try {
@@ -79,8 +90,12 @@ const updateProduct = async (req, res) => {
         const { id } = req.params;
         const updatedData = req.body;
 
+        // Se o produto tiver uma nova imagem, atualize o campo thumbnails
         if (req.file) {
-            updatedData.imagePath = `/img/${req.file.filename}`;
+            updatedData.thumbnails = [`/images/${req.file.filename}`];
+        } else {
+            // Se não há nova imagem, mantenha o valor anterior ou defina como um array vazio
+            updatedData.thumbnails = updatedData.thumbnails || [];
         }
 
         const updatedProduct = await productRepository.updateProduct(id, updatedData);
@@ -88,6 +103,7 @@ const updateProduct = async (req, res) => {
         if (!updatedProduct) {
             return res.status(404).json({ message: "Produto não encontrado" });
         }
+
         res.json(updatedProduct);
     } catch (error) {
         res.status(500).json({ error: error.message });

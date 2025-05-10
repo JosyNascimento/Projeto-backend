@@ -1,20 +1,6 @@
-<h1>Adicionar Produto</h1>
-
+<h1>Atualizar Imagem do Produto</h1>
 <form action="/products" method="POST" enctype="multipart/form-data">
-  <label for="title">Nome do Produto:</label>
-  <input type="text" id="title" name="title" required>
-
-  <label for="description">Descrição:</label>
-  <textarea id="description" name="description" required></textarea>
-
-  <label for="price">Preço:</label>
-  <input type="number" id="price" name="price" required>
-
-  <label for="stock">Estoque:</label>
-  <input type="number" id="stock" name="stock" required>
-
-  <label for="image">Imagem do Produto:</label>
-  <input type="file" id="image" name="image" accept="image/*" required>
-
-  <button type="submit">Salvar Produto</button>
+  <input type="text" name="title" required />
+  <input type="file" name="thumbnail" required /> 
+  <button type="submit">Enviar</button>
 </form>

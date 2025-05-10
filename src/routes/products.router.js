@@ -1,8 +1,17 @@
 // routes/products.router.js
 const express = require('express');
-const productController = require('../controllers/product.controller');
 const router = express.Router();
-const upload = require('../middlewares/multer.diskStorage');
+const upload = require('../config/multer.config'); // Importando o multer
+
+// Importação organizada dos métodos do controller
+const {
+  getHomePage,
+  getAllProducts,
+  renderAddProduct,
+  renderEditProduct,
+  createProduct
+} = require('../controllers/product.controller');
+
 /**
  * @swagger
  * tags:
@@ -10,21 +19,21 @@ const upload = require('../middlewares/multer.diskStorage');
  *   description: Páginas renderizadas de produtos
  */
 
-router.get('/', productController.getHomePage); // Página home
-router.get('/products', productController.getAllProducts);
-//router.get('/products', productController.renderProductsPage); // Vitrine com permissões
-router.get('/add', productController.renderAddProduct);
-router.get('/edit/:id', productController.renderEditProduct);
+router.get('/', getHomePage); // Página home
+router.get('/products', getAllProducts);
+// router.get('/products', renderProductsPage); // Vitrine com permissões (comentado)
+router.get('/add', renderAddProduct);
+router.get('/edit/:id', renderEditProduct);
 
-router.post('/add', upload.single('image'), productController.createProduct);
+router.post('/products', upload.single('thumbnail'), createProduct);
 
 router.post('/upload', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('Nenhum arquivo de imagem foi enviado.');
-    }
-    console.log('Arquivo recebido:', req.file);
-    const imagePath = `/uploads/${req.file.filename}`; // Caminho para salvar no banco de dados
-    res.send('Arquivo de imagem enviado com sucesso. Caminho: ' + imagePath);
+  if (!req.file) {
+    return res.status(400).send('Nenhum arquivo de imagem foi enviado.');
+  }
+  console.log('Arquivo recebido:', req.file);
+  const imagePath = `/uploads/${req.file.filename}`; // Caminho para salvar no banco de dados
+  res.send('Arquivo de imagem enviado com sucesso. Caminho: ' + imagePath);
 });
 
 module.exports = router;

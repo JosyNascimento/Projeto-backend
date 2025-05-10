@@ -96,7 +96,35 @@ const renderResetPassword = (req, res) => {
   res.render('resetPassword', { title: 'Redefinir Senha', token }); // Renderiza a view 'resetPassword'
 };
 
-  
+const renderCheckout = async (req, res) => {
+  try {
+    const { cid } = req.params;
+
+    // Obter o carrinho usando o cartId (cid) e popular os produtos
+    const cart = await cartRepository.getCartById(cid).populate('products.productId');
+
+    if (!cart || !cart.products || cart.products.length === 0) {
+      return res.status(400).send('Carrinho vazio ou não encontrado');
+    }
+
+    // Calcular o totalPrice somando o preço de cada produto * quantidade
+    const totalPrice = cart.products.reduce((total, item) => {
+      const product = item.productId; // Agora productId contém o produto completo com os dados
+      if (product && product.price) {
+        return total + (product.price * item.quantity);
+      }
+      return total;
+    }, 0);
+
+    // Renderizar a página de checkout
+    res.render("checkout", { cart, totalPrice });
+  } catch (error) {
+    console.error("Erro ao carregar checkout:", error);
+    res.status(500).send("Erro ao carregar checkout.");
+  }
+};
+
+
 
 module.exports = {
     renderHomePage,
@@ -110,4 +138,5 @@ module.exports = {
     renderForgotPassword,
     renderResetPassword,
     renderCarts,
+    renderCheckout,
    };
