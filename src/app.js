@@ -65,12 +65,12 @@ app.engine(
         },
         helpers: {
             or: function (a, b) { return a || b; },
-            eq: function (a, b) { return a === b; },
+            eq: (a, b) => String(a) === String(b),
             isAdmin: function (user) { return user && user.role === "admin"; },
             ifEquals: function (arg1, arg2, options) {
                 return arg1 == arg2 ? options.fn(this) : options.inverse(this);
             },
-            multiply: handlebarsUtils.helpers.multiply, // <-- AQUI!
+            multiply: handlebarsUtils.multiply,
             findIndex: function (array, comparator) {
                 if (!array || !Array.isArray(array)) return -1;
                 for (let i = 0; i < array.length; i++) {

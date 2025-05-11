@@ -12,19 +12,16 @@
             </tr>
         </thead>
         <tbody>
-            {{#each cart.products}}
-                {{#with (lookup ../cartProducts (findIndex ../cartProducts (compare _id this.productId)))}}
-                    <tr>
-                        <td>{{this.title}}</td>
-                        <td>{{../this.quantity}}</td>
-                        <td>R$ {{this.price}}</td>
-                        <td>R$ {{this.price * ../this.quantity}}</td>
-                    </tr>
-                {{else}}
-                    <tr><td colspan="4">Produto não encontrado</td></tr>
-                {{/with}}
+            {{#each cartItems}}
+                <tr>
+                    <td>{{this.productId.title}}</td>
+                    <td>{{this.quantity}}</td>
+                    <td>R$ {{this.productId.price}}</td>
+                    <td>R$ {{multiply this.productId.price this.quantity}}</td>
+                </tr>
             {{/each}}
         </tbody>
+
     </table>
 
     <div class="total-value">

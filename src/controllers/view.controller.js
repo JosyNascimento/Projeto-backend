@@ -116,24 +116,14 @@ const renderCheckout = async (req, res) => {
     if (!cart || !cart.products || cart.products.length === 0) {
       return res.status(400).send("Carrinho vazio ou não encontrado");
     }
-
-    //  IDs dos produtos no carrinho
-    const productIds = cart.products.map((product) => product.productId);
-    const cartProducts = await Product.find({ _id: { $in: productIds } });
-
+    
     // Calcular o totalPrice somando o preço de cada produto * quantidade
-    const totalPrice = cartProducts.reduce((total, product) => {
-      const cartProduct = cart.products.find(
-        (p) => p.productId.toString() === product._id.toString()
-      );
-      if (cartProduct && product.price) {
-        return total + product.price * cartProduct.quantity;
-      }
-      return total;
-    }, 0);
+    const totalPrice = cart.products.reduce((total, item) => {
+      return total + item.productId.price * item.quantity
+    }, 0)
 
     // Renderizar a página de checkout
-    res.render("checkout", { cart, totalPrice });
+    res.render("checkout", {cartItems: cart.products, totalPrice });
   } catch (error) {
     console.error("Erro ao carregar checkout:", error);
     res.status(500).send("Erro ao carregar checkout.");

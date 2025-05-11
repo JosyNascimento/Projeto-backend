@@ -1,9 +1,8 @@
 // src/routes/checkout.router.js
 const express = require('express');
 const router = express.Router();
+const cartController = require("../controllers/cart.controller");
 const checkoutController = require('../controllers/checkout.controller'); 
-
-
 
 router.get('/payment-success', checkoutController.paymentSuccess);
 router.get('/checkout', checkoutController.renderCheckoutPage);// Rota para exibir a página de checkout
@@ -18,6 +17,8 @@ router.get("/checkout-success", async (req, res) => {
       res.status(500).send("Erro ao carregar página de sucesso");
     }
   });
+
+router.get('/checkout/:cartId', cartController.getCartById)
   
 router.post('/create-payment-intent', checkoutController.createPaymentIntent);
 router.post('/checkout/process', checkoutController.processCheckout);// Rota para processar o envio do checkout
