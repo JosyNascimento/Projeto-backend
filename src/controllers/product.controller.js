@@ -43,7 +43,7 @@ const createProduct = async (req, res) => {
         code,
         stock,
         category,
-        thumbnails: thumbnails 
+        thumbnails,
       };
   
       await productService.createProduct(newProduct);

@@ -71,6 +71,8 @@ app.engine(
                 return arg1 == arg2 ? options.fn(this) : options.inverse(this);
             },
             multiply: handlebarsUtils.multiply,
+            renderProductImage: handlebarsUtils.renderProductImage,
+            renderProductImages: handlebarsUtils.renderProductImages,
             findIndex: function (array, comparator) {
                 if (!array || !Array.isArray(array)) return -1;
                 for (let i = 0; i < array.length; i++) {
