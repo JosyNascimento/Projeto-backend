@@ -85,19 +85,7 @@ const paymentSuccess = async (req, res) => {
     res.render('checkoutSuccess', { ticket });
   }
 
-  const renderCheckoutPage = async (req, res) => {
-    try {
-      // Lógica para buscar os itens do carrinho
-      const cartId = req.session.cartId; // Exemplo de como obter o ID do carrinho
-      const cart = await Cart.findById(cartId).populate('products.product').lean();
   
-      res.render('checkout', { cart }); // Renderiza a view 'checkout.handlebars'
-    } catch (error) {
-      console.error('Erro ao carregar a página de checkout:', error);
-      res.status(500).send('Erro ao carregar a página de checkout.');
-    }
-  };
-
 
 const processCheckout = async (req, res) => {
   try {
@@ -153,7 +141,5 @@ const processCheckout = async (req, res) => {
 module.exports = { 
   createPaymentIntent, 
   paymentSuccess, 
-  checkout, 
-  renderCheckoutPage,
   processCheckout,
  };

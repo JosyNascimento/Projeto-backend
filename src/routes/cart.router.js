@@ -21,7 +21,7 @@ router.delete("/:cid/product/:pid", authorizationMiddleware("user"), cartControl
 router.put("/:cid/product/:pid", authorizationMiddleware("user"), cartController.updateCartProductQuantity);
 
 // 🔹 Tickets (compra finalizada)
-router.post('/finalize-payment/:cartId', cartController.checkoutSuccess);
+//router.post('/finalize-payment/:cartId', cartController.checkoutSuccess);
 
 router.get('/purchase-success', (req, res) => {
     res.render('purchaseSuccess');
@@ -31,9 +31,9 @@ router.get('/purchase-success', (req, res) => {
 router.post("/:cid/purchase", authorizationMiddleware("user"), ticketController.createTicket); // Cria o ticket após a compra
 router.get("/ticket/:ticketId", ticketController.getTicketById); // Exibe os detalhes de um ticket
 router.get("/tickets", authorizationMiddleware("user"), ticketController.getTicketsByUserId); // Lista de tickets do usuário
-router.get('/checkoutSuccess/:cartId', cartController.checkoutSuccess);
+//router.get('/checkoutSuccess/:cartId', cartController.checkoutSuccess);
 // Rota para visualizar os detalhes da compra antes de finalizar
-router.get('/:cartId/checkout', authorizationMiddleware("user"), cartController.checkout);
+//router.get('/:cartId/checkout', authorizationMiddleware("user"), cartController.checkout);
 
 
 module.exports = router;

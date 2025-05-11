@@ -9,6 +9,7 @@
                 <th>Quantidade</th>
                 <th>Preço Unitário</th>
                 <th>Total</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -18,10 +19,14 @@
                     <td>{{this.quantity}}</td>
                     <td>R$ {{this.productId.price}}</td>
                     <td>R$ {{multiply this.productId.price this.quantity}}</td>
+                    <td>
+                        <form action="/api/carts/{{../cart._id}}/products/{{this.productId._id}}?_method=DELETE" method="POST">
+                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                        </form>
+                    </td>
                 </tr>
             {{/each}}
         </tbody>
-
     </table>
 
     <div class="total-value">
@@ -29,8 +34,8 @@
     </div>
 
     <div>
-        <form action="/finalize-payment/{{cart._id}}" method="POST">
-            <button type="submit" class="btn btn-success">Finalizar Pagamento</button>
+        <form action="/finalize-payment/{{cartId}}" method="POST">
+           <button type="submit" id="submit-btn" onclick="this.form.submit();">Finalizar Pagamento</button>
         </form>
     </div>
 </div>

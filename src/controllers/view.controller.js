@@ -2,9 +2,10 @@
 const userModel = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const Product = require("../models/product.model");
-console.log("view.controller carregado!");
 const CartRepository = require("../repositories/cart.repository");
 const cartRepository = new CartRepository();
+const ticketRepository = require("../repositories/ticket.repository");
+
 const renderHomePage = async (req, res) => {
   const token = req.cookies.token;
   try {
@@ -34,11 +35,9 @@ const renderCarts = async (req, res) => {
     //const userId = req.session.user.id;
     const cartId = req.params.cartId;
     const cart = await cartRepository.getCartById(cartId);
-    console.log("---CARRINHO AQUI---\n", cart);
     if (cart) {
       const { totalQuantity, totalPrice } =
         await cartRepository.calculateCartTotals(cartId);
-      console.log("Dados do carrinho:", cart, totalQuantity, totalPrice);
       return res.render("cart", {
         title: "Carrinho",
         cart,
@@ -46,7 +45,6 @@ const renderCarts = async (req, res) => {
         totalPrice,
       });
     } else {
-      console.log("Carrinho vazio");
       return res.render("cart", {
         title: "Carrinho",
         cart: { products: [] },
@@ -102,7 +100,6 @@ const renderForgotPassword = (req, res) => {
 // Adicionando a função renderResetPassword
 const renderResetPassword = (req, res) => {
   const { token } = req.params; // Recebe o token da URL
-  console.log("renderResetPassword chamado!");
   res.render("resetPassword", { title: "Redefinir Senha", token }); // Renderiza a view 'resetPassword'
 };
 
@@ -116,17 +113,75 @@ const renderCheckout = async (req, res) => {
     if (!cart || !cart.products || cart.products.length === 0) {
       return res.status(400).send("Carrinho vazio ou não encontrado");
     }
-    
+
     // Calcular o totalPrice somando o preço de cada produto * quantidade
     const totalPrice = cart.products.reduce((total, item) => {
-      return total + item.productId.price * item.quantity
-    }, 0)
+      if (item.productId && item.productId.price) {
+        return total + item.productId.price * item.quantity;
+      } else {
+        console.warn("Produto sem preço encontrado no carrinho:", item);
+        return total; // Ou outra lógica para lidar com produtos sem preço
+      }
+    }, 0);
 
     // Renderizar a página de checkout
-    res.render("checkout", {cartItems: cart.products, totalPrice });
+    res.render("checkout", {
+      cartItems: cart.products,
+      totalPrice,
+      cartId: cid,
+    });
   } catch (error) {
     console.error("Erro ao carregar checkout:", error);
     res.status(500).send("Erro ao carregar checkout.");
+  }
+};
+
+const renderCheckoutSuccess = async (req, res) => {
+  const ticketId = req.query.ticketId;
+
+  if (!ticketId) {
+    return res
+      .status(400)
+      .render("checkoutSuccess", { error: "ID do ticket não fornecido" });
+  }
+
+  try {
+    // Populate products.productId and user if needed
+    const ticket = await ticketRepository.getTicketById(ticketId);
+
+    if (!ticket) {
+      return res
+        .status(404)
+        .render("checkoutSuccess", { error: "Ticket não encontrado" });
+    }
+
+    // Manually expand product details if not populated already
+    // const detailedProducts = ticket.products.map((item) => ({
+    //   product: {
+    //     title: item.productId.title,
+    //     price: item.price,
+    //   },
+    //   quantity: item.quantity,
+    // }));
+
+    // // Optionally calculate total quantity and total price if used in template
+    // const totalQuantity = detailedProducts.reduce(
+    //   (sum, p) => sum + p.quantity,
+    //   0
+    // );
+    // const totalPrice = detailedProducts.reduce(
+    //   (sum, p) => sum + p.quantity * p.product.price,
+    //   0
+    // );
+
+    return res.render("checkoutSuccess", {
+      ticket,
+    });
+  } catch (error) {
+    console.error("Erro ao carregar ticket:", error);
+    return res
+      .status(500)
+      .render("checkoutSuccess", { error: "Erro interno ao carregar ticket" });
   }
 };
 
@@ -143,4 +198,5 @@ module.exports = {
   renderResetPassword,
   renderCarts,
   renderCheckout,
+  renderCheckoutSuccess,
 };
