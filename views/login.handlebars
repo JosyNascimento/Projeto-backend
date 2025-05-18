@@ -5,9 +5,6 @@
   {{/if}}
 <div class="login-container">
   <div class="login-card">
-
-  
-
     <form action="/login" method="POST">
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" required aria-label="Digite seu email">
@@ -19,11 +16,12 @@
     <button type="submit" aria-label="Entrar no sistema">Entrar</button>
 </form>
 
-      <a href="/forgot-password-info">Esqueci senha</a>
+<a href="/forgot-password-info">Esqueci senha</a>
     </form>
-
-    <a href="/api/sessions/github"><button>Entrar com GitHub</button></a>
+<a href="/api/sessions/github"><button>Entrar com GitHub</button></a>
+<a href="/register">Fazer Cadastro</a>
   </div>
+  
 </div>
   
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

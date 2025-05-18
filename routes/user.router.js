@@ -26,6 +26,10 @@ router.delete('/user/:email', async (req, res) => {
   }
 });
 
+router.get('/profile', (req, res) => {
+  res.render('profile', { user: req.session.user }); // ou qualquer dado que desejar passar
+});
+
 // Admin rotas (usando authMiddleware e adminMiddleware para garantir que o usuário é admin)
 
 // GET perfil do usuário logado

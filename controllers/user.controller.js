@@ -6,17 +6,17 @@ const crypto = require('crypto');
 
 async function getProfile(req, res) {
   try {
-      console.log("🟢 Acessando perfil...");
-      console.log("🔍 Usuário na sessão:", req.session.user);
+    console.log("🟢 Acessando perfil...");
+    console.log("🔍 Usuário na sessão:", req.session.user);
 
-      console.log("🔹 Tentando renderizar perfil...");
-      res.redirect('/profile');  // ✅ REDIRECIONA PARA A VIEW
-      console.log("✅ Página perfil renderizada com sucesso!");
+    console.log("🔹 Tentando renderizar perfil...");
+    res.render('profile', { user: req.session.user });
+    console.log("✅ Página perfil renderizada com sucesso!");
 
-      console.log("🔹 Finalizando a requisição...");
+    console.log("🔹 Finalizando a requisição...");
   } catch (error) {
-      console.error("❌ Erro ao renderizar perfil:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+    console.error("❌ Erro ao renderizar perfil:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
   }
 }
 
@@ -185,9 +185,9 @@ module.exports = {
   changeRole,
   deleteUser,
   adminUsers,
-  changeRole,
   getUserById,
   sendWelcomeEmail,
   getAllUsers,
   renderUserList,
 };
+

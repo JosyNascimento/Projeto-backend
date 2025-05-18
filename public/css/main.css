@@ -1,3 +1,5 @@
+
+
 /* Estilos globais */
 body, html {
     font-family: Arial, sans-serif;
@@ -71,10 +73,27 @@ body, html {
 }
 
 .user-avatar {
-  font-size: 1.5rem;
-  color: #f7efef;
-  margin-right: 0.5rem;
+    max-width: 20%;
+    max-height: 20%; 
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #fcf5f5;
+    font-size: 2em; /* Controla o tamanho do ícone */
+    border-radius: 50%;
+    padding: 0.5em;
+    text-decoration: none;
 }
+
+@media (max-width: 768px) {
+    .user-avatar {
+        font-size: 1.5em; /* Diminui o tamanho em telas menores */
+        max-width: 15%;
+        max-height: 15%;
+    }
+}
+
+/* Adicione mais media queries conforme necessário para outros tamanhos de tela */
 
 .user-message {
   font-size: 0.9rem;

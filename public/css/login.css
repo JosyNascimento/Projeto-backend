@@ -1,5 +1,7 @@
 
 /* Desafio9/src/public/css/login.css */
+
+
   .welcome-message {
     text-align: center;
     margin-bottom: 20px;
@@ -84,3 +86,54 @@
   box-shadow: 0 0 0 0.2rem rgba(128, 0, 128, 0.5) !important;
 }
 
+/* Garante que os grupos fiquem em linha em telas grandes */
+@media (min-width: 992px) {
+  .navbar-collapse .d-flex.flex-column.flex-lg-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2rem !important;
+  }
+
+  .navbar-nav {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1rem;
+  }
+
+  .user-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem;
+  }
+
+  .wellcome-message {
+    display: flex !important;
+text-align: center !important;  
+    align-items: center !important;
+    gap: 1rem;
+  }
+
+  #login-register-message {
+    display: none !important;
+  }
+
+  #logged-in-info {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .search-container {
+    display: flex !important;
+    align-items: center;
+    width: auto !important;
+  }
+
+  .cart-fav-icons {
+    display: flex !important;
+    align-items: center;
+    gap: 1rem;
+  }
+}
