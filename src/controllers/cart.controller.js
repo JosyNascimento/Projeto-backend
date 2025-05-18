@@ -27,14 +27,23 @@ const createCart = async (req, res) => {
 
 const getCartById = async (req, res) => {
   try {
-    const cartId = req.params.cid;
+    const cartId = req.params.cid || req.session.cartId;
+
+    if (!cartId) {
+      return res.render("cart", { cart: null, message: "Carrinho não encontrado" });
+    }
 
     const fullCart = await Cart.findById(cartId)
       .populate("products.productId")
       .lean();
 
-    if (!fullCart) {
-      return res.status(404).send("Carrinho não encontrado!");
+    if (!fullCart || !fullCart.products || fullCart.products.length === 0) {
+     return res.render("cart", {
+  cart: { _id: cartId, products: [] }, // Mantém estrutura para evitar erro no Handlebars
+  totalQuantity: 0,
+  totalPrice: 0,
+  message: "Seu carrinho está vazio.",
+});
     }
 
     res.render("cart", {
@@ -46,10 +55,6 @@ const getCartById = async (req, res) => {
     console.error("Erro ao buscar carrinho:", error);
     res.status(500).send("Erro no servidor");
   }
-};
-
-const calcularTotalQuantidade = (products) => {
-  return products.reduce((total, item) => total + item.quantity, 0);
 };
 
 const calcularTotalPreco = (products) => {
@@ -86,31 +91,35 @@ const updateCartProductQuantity = async (req, res) => {
 };
 
 const clearCart = async (req, res) => {
-  try {
-    const result = await cartRepository.clearCart(req.params.cid);
-    if (!result) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Carrinho não encontrado." });
+    const { cid } = req.params;
+    try {
+        await cartRepository.clearCart(cid);
+        req.session.cart = { products: [] }; // Limpar também a sessão para não logados
+        res.redirect('/cart');
+    } catch (error) {
+        console.error('Erro ao limpar carrinho:', error);
+        res.status(500).send('Erro ao limpar o carrinho.');
     }
-    res
-      .status(200)
-      .json({ status: "success", message: "Carrinho limpo com sucesso!" });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
-  }
 };
 
-const addProductToCartByCartId = async (req, res) => {
-  const { cartId, productId } = req.params;
-  const { quantity = 1 } = req.body;
-
+const addProductToCartByCartId= async (req, res) => {
   try {
-    const cart = await Cart.findById(cartId);
+    let cartId = req.session.cartId;
+    const { productId } = req.params;
+    const { quantity = 1 } = req.body;
+
+    // Verifica se já existe carrinho na sessão
+    let cart;
+    if (cartId) {
+      cart = await Cart.findById(cartId);
+    }
+
+    // Se não existir carrinho ou carrinho inválido, cria um novo
     if (!cart) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Carrinho não encontrado." });
+      const purchaserEmail = req.user?.email || "guest";
+      const newCart = await cartRepository.createCart({ purchaserEmail });
+      cart = newCart;
+      req.session.cartId = newCart._id.toString();
     }
 
     const product = await Product.findById(productId);
@@ -143,12 +152,10 @@ const addProductToCartByCartId = async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao adicionar produto ao carrinho:", error);
-    return res
-      .status(500)
-      .json({
-        status: "error",
-        message: `Erro ao adicionar produto ao carrinho: ${error.message}`,
-      });
+    return res.status(500).json({
+      status: "error",
+      message: `Erro ao adicionar produto ao carrinho: ${error.message}`,
+    });
   }
 };
 

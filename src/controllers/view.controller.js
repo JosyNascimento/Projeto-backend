@@ -12,21 +12,21 @@ const renderHomePage = async (req, res) => {
     // Buscar todos os produtos
     const products = await Product.find();
 
-    if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await userModel.findById(decoded._id);
-      cartId = user.cart || null; // Se houver um carrinho associado ao usuário
-      res.render("home", { title: "Home", user: decoded, products });
-    } else {
-      res.render("home", { title: "Home", user: null, products });
-    }
+   if (token) {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await userModel.findById(decoded._id);
+  res.render("home", { title: "Home", user: decoded, products });
+} else {
+  res.render("home", { title: "Home", user: null, products }); 
+}
+
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);
     res.status(500).send("Erro ao carregar a página inicial");
   }
 };
 
-const renderCarts = async (req, res) => {
+const renderCart = async (req, res) => {
   try {
     if (!req.session.user) {
       return res.redirect("/login");
@@ -195,8 +195,7 @@ module.exports = {
   renderProfile,
   renderResetPassword,
   renderForgotPassword,
-  renderResetPassword,
-  renderCarts,
+  renderCart,
   renderCheckout,
   renderCheckoutSuccess,
 };

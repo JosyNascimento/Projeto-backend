@@ -1,0 +1,40 @@
+/api/products:
+  get:
+    summary: Listar produtos
+    description: Retorna todos os produtos disponíveis
+    tags:
+      - Products
+    responses:
+      '200':
+        description: Lista de produtos retornada com sucesso
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+        category:
+          type: string
+      example:
+        _id: "660c455e4c13d10a3ad24e01"
+        title: "Mouse Gamer"
+        description: "Mouse de alta precisão para jogos"
+        price: 150.00
+        stock: 35
+        category: "Acessórios"

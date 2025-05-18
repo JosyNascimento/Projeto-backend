@@ -71,9 +71,11 @@ passport.use('login', new LocalStrategy({ usernameField: 'email', passwordField:
 // Estratégia de Login com GitHub
 passport.use('github', new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
+
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: process.env.GITHUB_CALLBACK_URL,
 }, async (accessToken, refreshToken, profile, done) => {
+    console.log("GitHub Client ID:", process.env.GITHUB_CLIENT_ID);
     console.log('AccessToken:', accessToken);
     console.log('refreshToken:', refreshToken);
     console.log("GitHubStrategy chamada.");

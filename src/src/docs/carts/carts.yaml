@@ -1,0 +1,166 @@
+openapi: 3.0.1
+info:
+  title: API de Carrinhos de Compras
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/carts:
+    get:
+      summary: Obter todos os carrinhos
+      tags:
+        - Carts
+      responses:
+        '200':
+          description: Carrinhos obtidos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        '500':
+          description: Erro ao obter os carrinhos
+    post:
+      summary: Criar um novo carrinho
+      tags:
+        - Carts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartInput'
+      responses:
+        '201':
+          description: Carrinho criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          description: Erro de validação
+  /api/carts/{cartId}:
+    get:
+      summary: Obter um carrinho por ID
+      tags:
+        - Carts
+      parameters:
+        - name: cartId
+          in: path
+          description: ID do carrinho
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Carrinho encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '404':
+          description: Carrinho não encontrado
+        '500':
+          description: Erro interno do servidor
+    put:
+      summary: Atualizar um carrinho por ID
+      tags:
+        - Carts
+      parameters:
+        - name: cartId
+          in: path
+          description: ID do carrinho
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartInput'
+      responses:
+        '200':
+          description: Carrinho atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          description: Erro de validação
+        '404':
+          description: Carrinho não encontrado
+        '500':
+          description: Erro interno do servidor
+    delete:
+      summary: Deletar um carrinho por ID
+      tags:
+        - Carts
+      parameters:
+        - name: cartId
+          in: path
+          description: ID do carrinho
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Carrinho deletado com sucesso
+        '404':
+          description: Carrinho não encontrado
+        '500':
+          description: Erro interno do servidor
+components:
+  schemas:
+    Cart:
+      type: object
+      description: Esquema completo do carrinho de compras.
+      properties:
+        _id:
+          type: string
+          description: ID do carrinho, gerado pelo MongoDB
+        userId:
+          type: string
+          description: ID do usuário dono do carrinho
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+                description: ID do produto adicionado ao carrinho
+              quantity:
+                type: integer
+                description: Quantidade do produto
+          default: []
+      example:
+        _id: "60b6c0f9f8d2c700174e4b3a"
+        userId: "5f9b9b9b9b9b9b9b9b9b9b9b"
+        products:
+          - productId: "65f01234567890abcdef1234"
+            quantity: 2
+    CartInput:
+      type: object
+      description: Esquema de entrada para criar ou atualizar um carrinho.
+      properties:
+        userId:
+          type: string
+          description: ID do usuário dono do carrinho
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+                description: ID do produto adicionado ao carrinho
+              quantity:
+                type: integer
+                description: Quantidade do produto
+      example:
+        userId: "5f9b9b9b9b9b9b9b9b9b9b9b"
+        products:
+          - productId: "65f01234567890abcdef1234"
+            quantity: 2

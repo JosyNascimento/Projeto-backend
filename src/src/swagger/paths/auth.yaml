@@ -1,0 +1,63 @@
+paths:
+  /api/auth/github:
+    get:
+      tags:
+        - Auth
+      summary: Redireciona para login com GitHub
+      responses:
+        '302':
+          description: Redirecionamento para GitHub OAuth
+
+  /api/auth/github/callback:
+    get:
+      tags:
+        - Auth
+      summary: Callback após login com GitHub
+      responses:
+        '200':
+          description: Login via GitHub bem-sucedido
+        '401':
+          description: Falha no login via GitHub
+
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Auth
+      summary: Solicitar recuperação de senha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "usuario@example.com"
+      responses:
+        '200':
+          description: E-mail de recuperação enviado
+        '400':
+          description: Erro ao solicitar recuperação
+
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Auth
+      summary: Redefinir senha com token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Senha redefinida com sucesso
+        '400':
+          description: Token inválido ou expirado

@@ -1,3 +1,7 @@
+{{#if message}}
+  <div class="alert alert-info">{{message}}</div>
+{{/if}}
+
 {{#if cart.products.length}}
     <table class="table">
         <thead>
@@ -57,7 +61,9 @@
     <div class="finalize-btn mt-3">
         <a href="/checkout/{{cart._id}}" class="btn btn-primary">Finalizar Compra</a>
 
-        <a href="/carts/clear/{{cart._id}}" class="btn btn-danger">Limpar Carrinho</a>
+        <a href="/api/cart/clear/{{cartId}}" class="btn btn-warning">Limpar carrinho</a>
+
+
         <a href="/" class="btn btn-primary">Continuar Comprando</a>
     </div>
 {{else}}
@@ -67,61 +73,50 @@
 
 <script>
     async function addToCart(productId, quantity = 1) {
-        try {
-            const response = await fetch('/carts/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ productId, quantity }),
-            });
+    try {
+        const response = await fetch('/carts/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId, quantity }),
+        });
 
-            if (response.ok) {
-                const data = await response.json();
-                const totalQuantity = data.totalQuantity;
+        if (response.ok) {
+            const data = await response.json();
+            const totalQuantity = data.totalQuantity;
 
-                const cartQuantityElement = document.getElementById('cart-quantity');
-                if (cartQuantityElement) {
-                    cartQuantityElement.textContent = totalQuantity;
-                }
-                console.log('Produto adicionado ao carrinho!', data);
-                // Opcional: Mostrar feedback visual ao usuário (ex: um pequeno alerta)
-            } else {
-                const error = await response.json();
-                alert('Erro ao adicionar ao carrinho: ' + error.message);
+            const cartQuantityElement = document.getElementById('cart-quantity');
+            if (cartQuantityElement) {
+                cartQuantityElement.textContent = totalQuantity;
             }
-        } catch (error) {
-            console.error('Erro ao adicionar ao carrinho:', error);
-            alert('Erro inesperado ao adicionar ao carrinho.');
+            console.log('Produto adicionado ao carrinho!', data);
+            // Redirecionar para a página do carrinho após a adição
+            window.location.href = '/cart';
+        } else {
+            const error = await response.json();
+            alert('Erro ao adicionar ao carrinho: ' + error.message);
         }
+    } catch (error) {
+        console.error('Erro ao adicionar ao carrinho:', error);
+        alert('Erro inesperado ao adicionar ao carrinho.');
     }
+}
 
-    async function removeFromCart(cartId, productId) {
-        try {
-            const response = await fetch(`/carts/${cartId}/product/${productId}`, {
-                method: 'DELETE',
-            });
+    async function clearCart(cartId) {
+  await fetch(`/api/cart/${cartId}`, {
+    method: 'DELETE'
+  });
+  window.location.reload();
+}
 
-            if (response.ok) {
-                console.log('Produto removido do carrinho!');
-                // Recarregue a página para atualizar a exibição do carrinho
-                window.location.reload();
-                // Ou, se preferir uma atualização mais dinâmica sem recarregar:
-                // const productRow = document.querySelector(`tr[data-product-id="${productId}"]`);
-                // if (productRow) {
-                //     productRow.remove();
-                //     // Recalcular e atualizar o preço total e a quantidade total
-                //     updateCartSummary(cartId); // Você precisaria implementar esta função
-                // }
-            } else {
-                const error = await response.json();
-                alert('Erro ao remover o produto do carrinho: ' + error.message);
-            }
-        } catch (error) {
-            console.error('Erro ao remover o produto do carrinho:', error);
-            alert('Erro inesperado ao remover o produto do carrinho.');
-        }
-    }
+async function removeFromCart(cartId, productId) {
+  await fetch(`/api/cart/${cartId}/product/${productId}`, {
+    method: 'DELETE',
+  });
+  window.location.reload();
+}
+
 
 async function updateQuantityInput(cartId, productId, newQuantity) {
     try {
@@ -148,7 +143,7 @@ async function updateQuantityInput(cartId, productId, newQuantity) {
 
     document.addEventListener('DOMContentLoaded', async () => {
         try {
-            const response = await fetch('/carts/quantity'); // Rota para obter a quantidade inicial do carrinho
+            const response = await fetch('/cart/quantity'); // Rota para obter a quantidade inicial do carrinho
             if (response.ok) {
                 const cartData = await response.json();
                 const totalQuantity = cartData.totalQuantity || 0;

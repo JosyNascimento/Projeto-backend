@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const jwtSecret = process.env.JWT_SECRET || "Coder";
+console.log(jwtSecret);
 const handlebars = require("express-handlebars");
 const handlebarsUtils = require("./utils/handlebars.utils");
 const path = require("path");
@@ -46,6 +47,11 @@ const io = new Server(server, {
     origin: "http://localhost:8080", // ou "*" para liberar geral
     methods: ["GET", "POST"],
   },
+});
+
+const upload = multer({ dest: './uploads/' });
+app.use('/upload', upload.single('file'), (req, res) => {
+  // Handle file upload
 });
 
 setupSwagger(app);
@@ -116,18 +122,12 @@ app.use((req, res, next) => {
   next();
 });
 // ✅ Configuração do Session
-app.use(
-  session({
-    store: mongoStore.create({
-      mongoUrl: process.env.MONGO_URL,
-      ttl: 15 * 60 * 60,
-    }),
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === "production" },
-  })
-);
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'supersecret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 dia
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -148,7 +148,7 @@ app.use("/api/auth", authApiRouter);
 app.use("/", viewRouter);
 app.use("/", userRouter);
 app.use("/", chatRouter);
-app.use("/api/carts", cartRouter);
+app.use("/api/cart", cartRouter);
 
 app.use("/products", productRouter);
 app.use("/", realTimeProductsRouter);

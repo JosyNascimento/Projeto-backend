@@ -15,13 +15,14 @@ const {
   renderRegisterPage,
   renderUpdateUserPage,
   githubCallback,
-  renderProfile,
-  renderCarts,
+  renderCart,
 } = require("../controllers/view.controller");
 
 router.get("/realtimeproducts", adminMiddleware, (req, res) => {
   res.render("realtimeproducts", { title: "Realtime Products" });
 });
+
+router.get("/products", productService.getProducts);
 
 router.get("/teste", (req, res) => {
   res.send("Rota de teste");
@@ -29,12 +30,22 @@ router.get("/teste", (req, res) => {
 router.get("/reset-password", (req, res) => {
   res.render("forgotPassword", { title: "Esqueci a Senha" });
 });
+
 //router.get('/carts', cartController.renderCarts);
 //router.post('/carts/add', cartController.addProductToCart);
 router.get("/", productController.getHomePage);
-router.get("/cart", renderCarts);
+router.get('/cart', viewController.renderCart);
 router.get("/login", renderLoginPage);
-router.get("/cart/:cartId", renderCarts);
+
+router.get('/', async (req, res) => {
+    const products = await productController.getHomePageData(req);
+    res.render('home', {
+        title: 'Página Inicial',
+        products: products,
+        user: req.session.user // ✅ Certifique-se de que req.session.user é undefined se não logado
+    });
+});
+router.get("/cart/:cartId", renderCart);
 
 //router.get('/forgot-password', viewController.renderForgotPassword);
 router.get("/forgot-password-info", (req, res) => {
@@ -54,7 +65,7 @@ router.get("/register", renderRegisterPage);
 router.get("/registerSuccess", userController.renderRegisterSuccess);
 router.get("/updateUser/:email", renderUpdateUserPage);
 router.get("/produtos", productController.renderProductsPage);
-router.get("/profile", renderProfile);
+
 router.get("/github/callback", githubCallback);
 router.get("/checkout/:cid", viewController.renderCheckout);
 router.get("/checkout-success", viewController.renderCheckoutSuccess);
