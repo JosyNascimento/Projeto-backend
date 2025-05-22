@@ -1,5 +1,7 @@
 //passpor.config
 require('dotenv').config(); // Coloque no topo sempre
+console.log("GITHUB_CLIENT_ID:", process.env.GITHUB_CLIENT_ID);
+
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
@@ -18,92 +20,94 @@ const createHash = (password) => {
     return bcrypt.hashSync(password, bcrypt.genSaltSync(saltRounds));
 };
 
-// Estratégia de Registro
-passport.use('login', new LocalStrategy(
-    { usernameField: 'email', passwordField: 'password' },
-    async (email, password, done) => {
-        try {
-            const user = await User.findOne({ email });
-            if (!user) {
-                return done(null, false, { message: 'Usuário não encontrado' });
-            }
-            const validPassword = await comparePassword(password, user.password);
-            if (!validPassword) {
-                return done(null, false, { message: 'Senha incorreta' });
-            }
-            return done(null, user);
-        } catch (err) {
-            return done(err);
-        }
-    }
-));
-
-
 // Estratégia de Login
-passport.use('login', new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, 
-    async (email, password, done) => {
-        try {
-            let user = await User.findOne({ email });
-            if (!user) {
-                console.log("❌ Usuário não encontrado:", email);
-                return done(null, false, { message: 'Usuário não encontrado' });
-            }
+passport.use('login', new LocalStrategy(
+  { usernameField: 'email', passwordField: 'password' },
+  async (email, password, done) => {
+    try {
+      let user = await User.findOne({ email });
+      if (!user) {
+        console.log("❌ Usuário não encontrado:", email);
+        return done(null, false, { message: 'Usuário não encontrado' });
+      }
 
-            console.log("✅ Usuário encontrado:", user.email);
-            console.log("🔑 Senha salva no banco:", user.password);
+      console.log("✅ Usuário encontrado:", user.email);
+      console.log("🔑 Senha salva no banco:", user.password);
 
-            const passwordMatch = isValidPassword(password, user.password);
-            console.log("🔍 Comparação de senha:", passwordMatch);
+      const passwordMatch = await isValidPassword(password, user.password);
+      console.log("🔍 Comparação de senha:", passwordMatch);
 
-            if (!passwordMatch) {
-                console.log("❌ Senha inválida");
-                return done(null, false, { message: 'Senha inválida' });
-            }
+      if (!passwordMatch) {
+        console.log("❌ Senha inválida");
+        return done(null, false, { message: 'Senha inválida' });
+      }
 
-            return done(null, user);
-        } catch (error) {
-            console.error("🔥 Erro interno na autenticação:", error);
-            return done(error);
-        }
+      return done(null, user);
+    } catch (error) {
+      console.error("🔥 Erro interno na autenticação:", error);
+      return done(error);
     }
+  }
 ));
 
 // Estratégia de Login com GitHub
+
 passport.use('github', new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
-
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: process.env.GITHUB_CALLBACK_URL,
+    scope: ["user:email"] // 🔥 necessário para pegar e-mail
 }, async (accessToken, refreshToken, profile, done) => {
-    console.log("GitHub Client ID:", process.env.GITHUB_CLIENT_ID);
-    console.log('AccessToken:', accessToken);
-    console.log('refreshToken:', refreshToken);
     console.log("GitHubStrategy chamada.");
     try {
-        console.log(profile);
-        if (profile._json && profile._json.email && profile._json.name) {
-            let user = await User.findOne({ email: profile._json.email });
-            if (!user) {
-                let newUser = {
-                    first_name: profile._json.name.split(' ')[0],
-                    last_name: profile._json.name.split(' ')[1],
-                    age: profile._json.age || 18,
-                    email: profile._json.email,
-                    password:  profile.id,
-                };
-                let result = await User.create(newUser);
-                return done(null, result);
-            } else {
-                return done(null, user);
-            }
+         console.log("Refresh token:", refreshToken);
+        console.log("Perfil do GitHub:", profile);
+        console.log("GITHUB_CLIENT_ID:", process.env.GITHUB_CLIENT_ID);
+        console.log("GITHUB_CLIENT_SECRET:", process.env.GITHUB_CLIENT_SECRET);
+        console.log("GITHUB_CALLBACK_URL:", process.env.GITHUB_CALLBACK_URL);
+
+        // Use the accessToken to make a request to the GitHub API
+        const githubApiUrl = `https://api.github.com/user?access_token=${accessToken}`;
+        const response = await fetch(githubApiUrl);
+        const userData = await response.json();
+
+        console.log("Dados do usuário do GitHub:", userData);
+
+        const email = profile._json.email || (profile.emails && profile.emails[0] && profile.emails[0].value);
+
+       
+        if (!email) {
+            return done("Erro: Nenhum e-mail disponível no perfil do GitHub.");
+        }
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            const fullName = profile._json.name || profile.displayName || profile.username || '';
+            const nameParts = fullName.split(' ');
+            const firstName = nameParts[0] || 'GitHub';
+            const lastName = nameParts.slice(1).join(' ') || 'User';
+
+            let newUser = {
+                first_name: firstName,
+                last_name: lastName,
+                age: 18,
+                email: email,
+                password: profile.id, // opcional — não serve como senha real
+                provider: 'github' // útil para distinguir usuários OAuth
+            };
+
+            const result = await User.create(newUser);
+            return done(null, result);
         } else {
-            return done("Erro: Dados do perfil do GitHub incompletos.");
+            return done(null, user);
         }
     } catch (error) {
         console.error("Erro na GitHubStrategy:", error);
         return done(`Erro ao autenticar usuário: ${error}`);
     }
 }));
+
 // Serialização do usuário
 passport.serializeUser((user, done) => {
     done(null, user._id);

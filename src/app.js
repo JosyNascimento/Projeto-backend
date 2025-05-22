@@ -49,8 +49,8 @@ const io = new Server(server, {
   },
 });
 
-const upload = multer({ dest: './uploads/' });
-app.use('/upload', upload.single('file'), (req, res) => {
+const upload = multer({ dest: './images/' });
+app.use('/images', upload.single('file'), (req, res) => {
   // Handle file upload
 });
 
@@ -115,7 +115,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "public")));
-app.use("/img", express.static(path.join(__dirname, "public", "img")));
+app.use("/images", express.static(path.join(__dirname, "public", "images")));
 
 app.use((req, res, next) => {
   req.io = io;
@@ -132,7 +132,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 console.log("Passport inicializado.");
-
+app.use(cors());
 // Middlewares
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -157,7 +157,7 @@ app.use("/deleteProduct", productRouter);
 app.use("/test", testRouter);
 app.use("/", checkoutRouter);
 app.use("/api/payments", paymentRouter);
-app.use(cors());
+
 
 // Configuração do Swagger
 const swaggerOptions = {

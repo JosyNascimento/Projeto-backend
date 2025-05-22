@@ -1,5 +1,5 @@
-// EntregaParcial3/src/controllers/home.controller.js
-const ProductService = require('../services/product.service'); // ajuste o caminho se necessário
+// EntregaFinal/src/controllers/home.controller.js
+const ProductService = require('../services/product.service'); 
 
 const getHome = async (req, res) => {
   try {
@@ -12,8 +12,8 @@ const getHome = async (req, res) => {
     res.render('home', {
       products,
       featuredProducts,
-      cartId: req.session.cartId // ou de onde estiver pegando
-    })    
+      cartId: cartId 
+    });    
 
   } catch (error) {
     console.error('Erro ao buscar produtos:', error);

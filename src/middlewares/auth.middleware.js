@@ -2,7 +2,34 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { User } = require('../models/user.model.js');
 
-// Middleware de login para gerar o token
+// Middleware para autenticação via JWT
+const jwtAuthMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "Token não fornecido." });
+  }
+
+  const token = authHeader.split(' ')[1]; // Espera: "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).json({ message: "Token malformado." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'Coder');
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Token inválido ou expirado." });
+  }
+};
+
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated && req.isAuthenticated()) return next();
+  return res.status(401).json({ message: 'Usuário não autenticado' });
+}
+
 
 // Middleware para verificar se o usuário está autenticado
 const authMiddleware = (req, res, next) => {
@@ -100,4 +127,6 @@ module.exports = {
     authorizationMiddleware, 
     isAdmin, 
     isUser,
+    jwtAuthMiddleware ,
+    isAuthenticated,
 };

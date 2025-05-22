@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../config/multer.config'); // Importando o multer
+const productController = require('../controllers/product.controller');
 
 // Importação organizada dos métodos do controller
 const {
@@ -19,20 +20,18 @@ const {
  *   description: Páginas renderizadas de produtos
  */
 
-router.get('/', getHomePage); // Página home
+router.get('/', getHomePage); 
 router.get('/products', getAllProducts);
-// router.get('/products', renderProductsPage); // Vitrine com permissões (comentado)
-router.get('/add', renderAddProduct);
+router.get('/add', renderAddProduct);// router.get('/products', renderProductsPage); // Vitrine com permissões (comentado)
 router.get('/edit/:id', renderEditProduct);
 
-router.post('/products', upload.single('thumbnail'), createProduct);
-
-router.post('/upload', upload.single('image'), (req, res) => {
+router.post('/product/:id', upload.single('thumbnail'),productController.updateProduct);
+router.post('/upload', upload.single('images'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('Nenhum arquivo de imagem foi enviado.');
   }
   console.log('Arquivo recebido:', req.file);
-  const imagePath = `/uploads/${req.file.filename}`; // Caminho para salvar no banco de dados
+  const imagePath = `/images/${req.file.filename}`; // Caminho para salvar no banco de dados
   res.send('Arquivo de imagem enviado com sucesso. Caminho: ' + imagePath);
 });
 

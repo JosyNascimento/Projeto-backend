@@ -1,4 +1,4 @@
-// entregaParcial3/src/repositories/cart.repository.js
+// entrega
 const Cart = require('../models/cart.model');
 const Product = require('../models/product.model');
 

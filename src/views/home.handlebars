@@ -64,7 +64,7 @@
     }
 
     try {
-      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+      const response = await fetch(`/api/cart/${cartId}/product/${productId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'text/html' },
         body: JSON.stringify({ quantity: 1, price: productPrice }) 
@@ -82,4 +82,73 @@
       alert("Erro inesperado ao adicionar ao carrinho.");
     }
   }
+ async function removeFromCart(cartId, productId) {
+        try {
+            const response = await fetch(`/api/cart/${cartId}/product/${productId}`, { // Ajustado a rota para /api/cart
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('Produto excluído com sucesso!'); // <-- ADICIONADO O ALERTA AQUI!
+                console.log('Produto removido do carrinho!');
+                window.location.reload(); // Isso recarregará a página após o alerta
+            } else {
+                const error = await response.json();
+                alert('Erro ao remover o produto do carrinho: ' + error.message);
+            }
+        } catch (error) {
+            console.error('Erro ao remover o produto do carrinho:', error);
+            alert('Erro inesperado ao remover o produto do carrinho.');
+        }
+    }
+
+    async function updateQuantityInput(cartId, productId, newQuantity) {
+        try {
+            const response = await fetch(`/api/cart/${cartId}/product/${productId}`, { // Ajustado a rota para /api/cart
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantity: parseInt(newQuantity, 10) }),
+            });
+
+            if (response.ok) {
+                alert('Quantidade atualizada com sucesso!'); // Alerta para atualização de quantidade
+                console.log('Quantidade atualizada com sucesso!');
+                window.location.reload(); 
+            } else {
+                const error = await response.json();
+                alert('Erro ao atualizar a quantidade: ' + error.message);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar a quantidade:', error);
+            alert('Erro inesperado ao atualizar a quantidade.');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/api/carts/quantity'); // Rota para obter a quantidade inicial do carrinho (Ajustado para /api/carts)
+            if (response.ok) {
+                const cartData = await response.json();
+                const totalQuantity = cartData.totalQuantity || 0;
+                const cartQuantityElement = document.getElementById('cart-quantity');
+                if (cartQuantityElement) {
+                    cartQuantityElement.textContent = totalQuantity;
+                }
+            } else {
+                console.error('Erro ao carregar quantidade do carrinho inicial.');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar quantidade do carrinho inicial:', error);
+        }
+
+        const buyButtons = document.querySelectorAll('.botao-comprar'); 
+        buyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id'); 
+                addToCart(productId);
+            });
+        });
+    });
 </script>
