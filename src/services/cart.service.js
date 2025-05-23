@@ -15,4 +15,20 @@ const handleAddProductLogic = async (cart, productId, quantity) => {
   await cart.save();
 };
 
-module.exports = { handleAddProductLogic };
+const removeProductFromCart = async (cartId, productId) =>{
+    const cart = await this.cartRepository.getById(cartId);
+    if (!cart) {
+        throw new Error('Carrinho não encontrado');
+    }
+
+    const productIndex = cart.products.findIndex(p => p.productId._id.toString() === productId);
+
+    if (productIndex === -1) {
+        throw new Error('Produto não encontrado no carrinho');
+    }
+    cart.products.splice(productIndex, 1);
+
+    return await this.cartRepository.update(cartId, { products: cart.products });
+}
+
+module.exports = { handleAddProductLogic, removeProductFromCart };

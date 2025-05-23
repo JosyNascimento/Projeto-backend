@@ -1,6 +1,4 @@
-// entrega
 const Cart = require('../models/cart.model');
-const Product = require('../models/product.model');
 
 class CartRepository {
     async getCartById(id) {
@@ -14,17 +12,16 @@ class CartRepository {
 
     async getCartByUserId(userId) {
         try {
-            const res = await Cart.findOne({ userId })
-            console.log('---RESPONSE AQUI---\n', res)
-            console.log('---USER ID---\n', userId)
-            return
+            const cart = await Cart.findOne({ userId }).populate('products.productId');
+            return cart;
         } catch (error) {
+            console.error('Erro ao buscar carrinho por userId:', error);
             throw error;
         }
     }
+
     async createCart(cartData) {
         try {
-             // TODO: verificar se já existe um carrinho antes de criar um novo
             return await Cart.create(cartData);
         } catch (error) {
             console.error('Erro ao criar carrinho:', error);
@@ -53,18 +50,17 @@ class CartRepository {
     async addProductToCart(cartId, productId, quantity = 1) {
         try {
             const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrinho não encontrado');
-            }
+            if (!cart) throw new Error('Carrinho não encontrado');
 
-            const existingProduct = cart.products.find(p => p.product.toString() === productId);
+            const existingProduct = cart.products.find(p => p.productId.toString() === productId);
             if (existingProduct) {
                 existingProduct.quantity += quantity;
             } else {
-                cart.products.push({ product: productId, quantity });
+                cart.products.push({ productId, quantity });
             }
 
-            return await cart.save();
+            await cart.save();
+            return await cart.populate('products.productId');
         } catch (error) {
             console.error('Erro ao adicionar produto ao carrinho:', error);
             throw error;
@@ -74,12 +70,12 @@ class CartRepository {
     async removeProductFromCart(cartId, productId) {
         try {
             const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrinho não encontrado');
-            }
+            if (!cart) throw new Error('Carrinho não encontrado');
 
-            cart.products = cart.products.filter(p => p.product.toString() !== productId);
-            return await cart.save();
+            cart.products = cart.products.filter(p => p.productId.toString() !== productId.toString());
+
+            await cart.save();
+            return await cart.populate('products.productId');
         } catch (error) {
             console.error('Erro ao remover produto do carrinho:', error);
             throw error;
@@ -89,12 +85,11 @@ class CartRepository {
     async clearCart(cartId) {
         try {
             const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrinho não encontrado');
-            }
+            if (!cart) throw new Error('Carrinho não encontrado');
 
             cart.products = [];
-            return await cart.save();
+            await cart.save();
+            return await cart.populate('products.productId');
         } catch (error) {
             console.error('Erro ao limpar carrinho:', error);
             throw error;
@@ -104,14 +99,13 @@ class CartRepository {
     async getCartTotal(cartId) {
         try {
             const cart = await Cart.findById(cartId).populate('products.productId');
-            if (!cart) {
-                throw new Error('Carrinho não encontrado');
-            }
+            if (!cart) throw new Error('Carrinho não encontrado');
 
-            let total = 0;
-            for (const item of cart.products) {
-                total += item.product.price * item.quantity;
-            }
+            const total = cart.products.reduce((sum, item) => {
+                const price = item.productId?.price || 0;
+                return sum + price * item.quantity;
+            }, 0);
+
             return total;
         } catch (error) {
             console.error('Erro ao calcular total do carrinho:', error);
@@ -121,41 +115,36 @@ class CartRepository {
 
     async calculateCartTotals(cartId) {
         try {
-            const cart = await Cart.findById(cartId).populate('products.productId'); // POPULATE aqui!
-            if (!cart) {
-                throw new Error('Carrinho não encontrado');
-            }
-    
-            let totalQuantity = 0;
-            let totalPrice = 0;
-    
-            for (const item of cart.products) {
-                if (item.productId) {
-                    totalQuantity += item.quantity;
-                    totalPrice += Number(item.productId.price || 0) * item.quantity;
-                }
-            }
-    
+            const cart = await Cart.findById(cartId).populate('products.productId');
+            if (!cart) throw new Error('Carrinho não encontrado');
+
+            const { totalQuantity, totalPrice } = cart.products.reduce(
+                (acc, item) => {
+                    const price = item.productId?.price || 0;
+                    acc.totalQuantity += item.quantity;
+                    acc.totalPrice += item.quantity * price;
+                    return acc;
+                },
+                { totalQuantity: 0, totalPrice: 0 }
+            );
+
             return { totalQuantity, totalPrice };
         } catch (error) {
             console.error('Erro ao calcular totais do carrinho:', error);
             throw error;
         }
     }
-    
 
     async updateCartProductQuantity(cartId, productId, quantity) {
         try {
             const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrinho não encontrado');
-            }
+            if (!cart) throw new Error('Carrinho não encontrado');
 
-            const itemIndex = cart.products.findIndex(item => item.product.toString() === productId);
-            if (itemIndex > -1) {
-                cart.products[itemIndex].quantity = quantity;
+            const item = cart.products.find(p => p.productId.toString() === productId);
+            if (item) {
+                item.quantity = quantity;
                 await cart.save();
-                return cart;
+                return await cart.populate('products.productId');
             } else {
                 return null;
             }

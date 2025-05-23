@@ -241,26 +241,32 @@ const addProductToCartByCartId= async (req, res) => {
 };
 
 const removeProductFromCart = async (req, res) => {
-    const { cartId, productId } = req.params;
+    console.log('>>> removeProductFromCart no controller foi chamado!');
+    const { cid, productId } = req.params;
+
+console.log(`DEBUG_CONTROLLER: Tentando remover produto ${productId} do carrinho ${cid}`); 
 
     try {
-        const cart = await Cart.findById(cartId);
+        const cart = await Cart.findById(cid);
         if (!cart) {
             return res.status(404).json({ status: 'error', message: 'Carrinho não encontrado.' });
         }
 
-        const productIndex = cart.products.findIndex(p => p.product.toString() === productId);
+        const productIndex = cart.products.findIndex(p => p.productId && p.productId.toString() === productId);
 
-        if (productIndex === -1) {
-            return res.status(404).json({ status: 'error', message: 'Produto nao encontrado no carrinho.' });
+       if (productIndex === -1) {
+            console.log(`DEBUG_CONTROLLER: Produto ${productId} não encontrado no carrinho ${cid}.`);
+            return res.status(404).json({ status: 'error', message: 'Produto não encontrado no carrinho.' });
         }
 
         cart.products.splice(productIndex, 1);
         await cart.save();
 
+       console.log(`DEBUG_CONTROLLER: Produto ${productId} removido com sucesso do carrinho ${cid}.`);
         return res.json({ status: 'success', message: 'Produto removido do carrinho!' });
     } catch (error) {
-        return res.status(500).json({ status: 'error', message: 'Erro ao remover produto do carrinho.' });
+        console.error("🔥🔥🔥 ERRO CRÍTICO no controller removeProductFromCart:", error); // Log mais chamativo para erros
+        return res.status(500).json({ status: 'error', message: 'Erro inesperado ao excluir produto do carrinho.' });
     }
 };
 

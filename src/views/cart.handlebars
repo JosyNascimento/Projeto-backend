@@ -67,8 +67,15 @@
 {{/if}}
 
 <script>
+    // ===================================================================
+    // FUNÇÕES JAVASCRIPT MOVIDAS PARA O ESCOPO GLOBAL
+    // Assim, o HTML pode chamá-las diretamente via onclick.
+    // ===================================================================
+
     async function addToCart(productId, quantity = 1) {
         try {
+            // Verifique se a rota '/cart/add' é a correta no seu backend,
+            // ou se precisa ser '/api/cart/add'
             const response = await fetch('/cart/add', {
                 method: 'POST',
                 headers: {
@@ -79,14 +86,11 @@
 
             if (response.ok) {
                 const data = await response.json();
-                const totalQuantity = data.totalQuantity;
-
                 const cartQuantityElement = document.getElementById('cart-quantity');
                 if (cartQuantityElement) {
-                    cartQuantityElement.textContent = totalQuantity;
+                    cartQuantityElement.textContent = data.totalQuantity;
                 }
-                console.log('Produto adicionado ao carrinho!', data);
-                // Opcional: Mostrar feedback visual ao usuário (ex: um pequeno alerta)
+                alert('Produto adicionado ao carrinho com sucesso!');
             } else {
                 const error = await response.json();
                 alert('Erro ao adicionar ao carrinho: ' + error.message);
@@ -99,57 +103,81 @@
 
     async function removeFromCart(cartId, productId) {
         try {
-            const response = await fetch(`/cart/${cartId}/product/${productId}`, {
+            // **IMPORTANTE:** Confirme esta rota com a do seu `cart.router.js`
+            // Deve ser exatamente a mesma, incluindo '/cart' ou '/api/cart'
+            const response = await fetch(`/api/cart/${cartId}/product/${productId}`, {
                 method: 'DELETE',
             });
 
             if (response.ok) {
-                console.log('Produto removido do carrinho!');
-                // Recarregue a página para atualizar a exibição do carrinho
-                window.location.reload();
-                // Ou, se preferir uma atualização mais dinâmica sem recarregar:
-                // const productRow = document.querySelector(`tr[data-product-id="${productId}"]`);
-                // if (productRow) {
-                //     productRow.remove();
-                //     // Recalcular e atualizar o preço total e a quantidade total
-                //     updateCartSummary(cartId); // Você precisaria implementar esta função
-                // }
+                alert('Produto excluído com sucesso!');
+                window.location.reload(); // Recarrega a página para refletir a mudança
             } else {
                 const error = await response.json();
-                alert('Erro ao remover o produto do carrinho: ' + error.message);
+                alert('Erro ao excluir o produto do carrinho: ' + (error.message || 'Erro desconhecido.'));
             }
         } catch (error) {
-            console.error('Erro ao remover o produto do carrinho:', error);
-            alert('Erro inesperado ao remover o produto do carrinho.');
+            console.error('Erro de rede ou fetch falhou:', error);
+            alert('Erro inesperado ao excluir o produto do carrinho. Verifique a conexão ou os logs do servidor.');
         }
     }
 
-async function updateQuantityInput(cartId, productId, newQuantity) {
-    try {
-        const response = await fetch(`/carts/${cartId}/product/${productId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ quantity: parseInt(newQuantity, 10) }),
-        });
+    async function updateQuantityInput(cartId, productId, newQuantity) {
+        try {
+            // **IMPORTANTE:** Confirme esta rota com a do seu `cart.router.js` para UPDATE
+            // Deve ser exatamente a mesma, incluindo '/carts' ou '/api/carts'
+            const response = await fetch(`/carts/${cartId}/product/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantity: parseInt(newQuantity, 10) }),
+            });
 
-        if (response.ok) {
-            console.log('Quantidade atualizada com sucesso!');
-            window.location.reload(); // Ou atualize o total dinamicamente, se preferir
-        } else {
-            const error = await response.json();
-            alert('Erro ao atualizar a quantidade: ' + error.message);
+            if (response.ok) {
+                alert('Quantidade atualizada com sucesso!');
+                window.location.reload(); // Recarrega a página
+            } else {
+                const error = await response.json();
+                alert('Erro ao atualizar a quantidade: ' + error.message);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar a quantidade:', error);
+            alert('Erro inesperado ao atualizar a quantidade.');
         }
-    } catch (error) {
-        console.error('Erro ao atualizar a quantidade:', error);
-        alert('Erro inesperado ao atualizar a quantidade.');
     }
-}
 
+    async function clearMyCart(cartId) {
+        try {
+            // **IMPORTANTE:** Confirme esta rota com a do seu `cart.router.js` para CLEAR
+            // Deve ser exatamente a mesma, incluindo '/api/cart/clear'
+            const response = await fetch(`/api/cart/clear/${cartId}`, {
+                method: 'DELETE', // Recomenda-se DELETE para limpar recursos
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(data.message || 'Carrinho limpo com sucesso!');
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert('Erro ao limpar o carrinho: ' + error.message);
+            }
+        } catch (error) {
+            console.error('Erro ao limpar o carrinho:', error);
+            alert('Erro inesperado ao limpar o carrinho.');
+        }
+    }
+
+    // ===================================================================
+    // ESTE BLOCO DOMContentLoaded AGORA CONTÉM APENAS A LÓGICA QUE
+    // PRECISA ESPERAR O DOM CARREGAR COMPLETAMENTE.
+    // As funções chamadas pelo HTML diretamente já estão no escopo global.
+    // ===================================================================
     document.addEventListener('DOMContentLoaded', async () => {
         try {
-            const response = await fetch('/carts/quantity'); // Rota para obter a quantidade inicial do carrinho
+            // Confirme esta rota: '/carts/quantity' ou '/api/carts/quantity'
+            const response = await fetch('/api/carts/quantity'); 
             if (response.ok) {
                 const cartData = await response.json();
                 const totalQuantity = cartData.totalQuantity || 0;
@@ -165,10 +193,10 @@ async function updateQuantityInput(cartId, productId, newQuantity) {
         }
 
         // Adicione event listeners aos botões "Comprar" dos seus produtos
-        const buyButtons = document.querySelectorAll('.botao-comprar'); // Use a classe ou seletor correto dos seus botões
+        const buyButtons = document.querySelectorAll('.botao-comprar');
         buyButtons.forEach(button => {
             button.addEventListener('click', function() {
-                const productId = this.getAttribute('data-product-id'); // Assumindo que o ID do produto está neste atributo
+                const productId = this.getAttribute('data-product-id');
                 addToCart(productId);
             });
         });

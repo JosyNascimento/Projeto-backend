@@ -84,14 +84,14 @@
   }
  async function removeFromCart(cartId, productId) {
         try {
-            const response = await fetch(`/api/cart/${cartId}/product/${productId}`, { // Ajustado a rota para /api/cart
+            const response = await fetch(`/api/cart/${cartId}/product/${productId}`, { 
                 method: 'DELETE',
             });
 
             if (response.ok) {
-                alert('Produto excluído com sucesso!'); // <-- ADICIONADO O ALERTA AQUI!
+                alert('Produto excluído com sucesso!'); 
                 console.log('Produto removido do carrinho!');
-                window.location.reload(); // Isso recarregará a página após o alerta
+                window.location.reload(); // recarregará a página após o alerta
             } else {
                 const error = await response.json();
                 alert('Erro ao remover o produto do carrinho: ' + error.message);
@@ -104,7 +104,7 @@
 
     async function updateQuantityInput(cartId, productId, newQuantity) {
         try {
-            const response = await fetch(`/api/cart/${cartId}/product/${productId}`, { // Ajustado a rota para /api/cart
+            const response = await fetch(`/api/cart/${cartId}/product/${productId}`, { 
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

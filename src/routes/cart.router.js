@@ -3,9 +3,18 @@ const express = require("express");
 const router = express.Router();
 const ticketController = require("../controllers/ticket.controller");
 const cartController = require("../controllers/cart.controller");
+const { isAuthenticated } = require('../middlewares/auth.middleware');
 const { authorizationMiddleware } = require("../middlewares/auth.middleware");
 const { jwtAuthMiddleware } = require("../middlewares/auth.middleware"); // ajuste o caminho se necessário
-
+// Importando as funções específicas para uso direto no router
+const {
+    addProductToCartByCartId,
+    getCartById,
+    removeProductFromCart, 
+    updateCartProductQuantity,
+    clearCart,
+    createCart
+} = cartController;
 // Rota para adicionar produto ao carrinho
 router.post('/:cid/product/:productId', cartController.addProductToCartByCartId);
 
@@ -14,7 +23,13 @@ router.post('/:cid/product/:productId', cartController.addProductToCartByCartId)
 router.get("/:cid", authorizationMiddleware("user"), cartController.getCartById);
 
 // Rota para DELETAR APENAS UM produto do carrinho
-router.delete('/carts/:cid/product/:pid',jwtAuthMiddleware, authorizationMiddleware('user'), 
+router.delete('/:cid/product/:productId', // <--- ATENÇÃO AQUI!
+    (req, res, next) => {
+        console.log('>>> Rota DELETE /cart/:cid/product/:productId atingida!');
+        console.log('Parâmetros da Rota:', req.params);
+        next();
+    }, 
+    removeProductFromCart // Use a função importada diretamente
 );
 
 // Atualizar a quantidade de um produto no carrinho

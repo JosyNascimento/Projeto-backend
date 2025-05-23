@@ -32,7 +32,6 @@ router.get("/reset-password", (req, res) => {
 });
 
 //router.get('/carts', cartController.renderCarts);
-//router.post('/carts/add', cartController.addProductToCart);
 router.get("/", productController.getHomePage);
 router.get('/cart', viewController.renderCart);
 router.get("/login", renderLoginPage);
