@@ -57,7 +57,7 @@
     <div class="finalize-btn mt-3">
         <a href="/checkout/{{cart._id}}" class="btn btn-primary">Finalizar Compra</a>
 
-        <a href="/api/cart/clear/{{cart._id}}" class="btn btn-danger">Limpar Carrinho</a>
+        <button class="btn btn-danger" onclick="clearMyCart('{{cart._id}}')">Limpar Carrinho</button>
 
         <a href="/" class="btn btn-primary">Continuar Comprando</a>
     </div>
@@ -67,11 +67,6 @@
 {{/if}}
 
 <script>
-    // ===================================================================
-    // FUNÇÕES JAVASCRIPT MOVIDAS PARA O ESCOPO GLOBAL
-    // Assim, o HTML pode chamá-las diretamente via onclick.
-    // ===================================================================
-
     async function addToCart(productId, quantity = 1) {
         try {
             // Verifique se a rota '/cart/add' é a correta no seu backend,
@@ -103,8 +98,7 @@
 
     async function removeFromCart(cartId, productId) {
         try {
-            // **IMPORTANTE:** Confirme esta rota com a do seu `cart.router.js`
-            // Deve ser exatamente a mesma, incluindo '/cart' ou '/api/cart'
+        
             const response = await fetch(`/api/cart/${cartId}/product/${productId}`, {
                 method: 'DELETE',
             });
@@ -124,8 +118,7 @@
 
     async function updateQuantityInput(cartId, productId, newQuantity) {
         try {
-            // **IMPORTANTE:** Confirme esta rota com a do seu `cart.router.js` para UPDATE
-            // Deve ser exatamente a mesma, incluindo '/carts' ou '/api/carts'
+           
             const response = await fetch(`/carts/${cartId}/product/${productId}`, {
                 method: 'PUT',
                 headers: {
@@ -149,16 +142,15 @@
 
     async function clearMyCart(cartId) {
         try {
-            // **IMPORTANTE:** Confirme esta rota com a do seu `cart.router.js` para CLEAR
-            // Deve ser exatamente a mesma, incluindo '/api/cart/clear'
+          
             const response = await fetch(`/api/cart/clear/${cartId}`, {
-                method: 'DELETE', // Recomenda-se DELETE para limpar recursos
+                method: 'DELETE', //DELETE para limpar recursos
             });
 
             if (response.ok) {
                 const data = await response.json();
-                alert(data.message || 'Carrinho limpo com sucesso!');
-                window.location.reload();
+                alert(data.message || 'Produtos excluídos com sucesso!');
+                window.location.reload(); //recarrega a página do carrinho
             } else {
                 const error = await response.json();
                 alert('Erro ao limpar o carrinho: ' + error.message);
@@ -169,11 +161,9 @@
         }
     }
 
-    // ===================================================================
+   
     // ESTE BLOCO DOMContentLoaded AGORA CONTÉM APENAS A LÓGICA QUE
     // PRECISA ESPERAR O DOM CARREGAR COMPLETAMENTE.
-    // As funções chamadas pelo HTML diretamente já estão no escopo global.
-    // ===================================================================
     document.addEventListener('DOMContentLoaded', async () => {
         try {
             // Confirme esta rota: '/carts/quantity' ou '/api/carts/quantity'

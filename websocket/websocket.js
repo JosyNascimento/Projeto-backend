@@ -1,6 +1,6 @@
-const productService = require("../services/productService");
-const Message = require("../models/chat.model");
-const chat = require("../models/chat.model");
+const productService = require("../src/services/productService");
+const Message = require("../src/models/chat.model");
+const chat = require("../src/models/chat.model");
 const setupWebSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("Usuário conectado:", socket.id);

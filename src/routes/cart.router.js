@@ -7,17 +7,9 @@ const { isAuthenticated } = require('../middlewares/auth.middleware');
 const { authorizationMiddleware } = require("../middlewares/auth.middleware");
 const { jwtAuthMiddleware } = require("../middlewares/auth.middleware"); // ajuste o caminho se necessário
 // Importando as funções específicas para uso direto no router
-const {
-    addProductToCartByCartId,
-    getCartById,
-    removeProductFromCart, 
-    updateCartProductQuantity,
-    clearCart,
-    createCart
-} = cartController;
+const {removeProductFromCart} = cartController;
 // Rota para adicionar produto ao carrinho
 router.post('/:cid/product/:productId', cartController.addProductToCartByCartId);
-
 
 // Rota para visualizar um carrinho pelo ID
 router.get("/:cid", authorizationMiddleware("user"), cartController.getCartById);
@@ -41,7 +33,7 @@ router.get('/purchase-success', (req, res) => {
 });
 
 // Rota GET para limpar TODO o carrinho (opcional, mas pode ser útil para links)
-router.get("/clear/:cid", authorizationMiddleware("user"), cartController.clearCart);
+router.delete("/clear/:cid", authorizationMiddleware("user"), cartController.clearCart);
 router.post("/:cid/purchase", authorizationMiddleware("user"), ticketController.createTicket); // Cria o ticket após a compra
 router.get("/ticket/:ticketId", ticketController.getTicketById); // Exibe os detalhes de um ticket
 router.get("/tickets", authorizationMiddleware("user"), ticketController.getTicketsByUserId); // Lista de tickets do usuário

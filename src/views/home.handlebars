@@ -1,10 +1,28 @@
 <h1 class="text-center mt-4">Bem-vindo à Loja!</h1>
-
+<script>
+    console.log("--- home.handlebars FOI CARREGADO! ---");
+</script>
 <div id="carouselExampleIndicators" class="carousel slide mb-5" data-bs-ride="carousel">
   <div class="carousel-inner">
     {{#each featuredProducts}}
       <div class="carousel-item {{#if @first}}active{{/if}}">
-        <img src="{{#if this.thumbnails}}{{'/images/'}}{{this.thumbnails.[0]}}{{else}}/images.jpg{{/if}}" class="d-block w-100" alt="{{this.title}}">
+        <img src="{{#if this.thumbnails}}
+    {{#if this.thumbnails.[0]}}
+        /images/{{this.thumbnails.[0]}}
+    {{else}}
+        /images/default.jpg
+    {{/if}}
+{{else}}
+    /images/default.jpg
+{{/if}}" class="d-block w-100" alt="{{this.title}}">
+<script>
+    console.log("DADOS DO PRODUTO ({{this.title}}):", JSON.stringify({{json this}}));
+</script>
+<script>
+    console.log("Thumbnails para este produto:", JSON.stringify({{json this.thumbnails}}));
+    console.log("É um array?", Array.isArray({{json this.thumbnails}}));
+    console.log("Primeiro elemento:", {{json this.thumbnails.[0]}});
+</script>
         <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
           <h5>{{this.title}}</h5>
           <p>{{this.description}}</p>
@@ -24,7 +42,15 @@
   {{#each products}}
     <div class="col">
       <div class="card h-100">
-        <img src="{{#if this.thumbnails}}{{'/images/'}}{{this.thumbnails.[0]}}{{else}}/images.jpg{{/if}}" class="d-block w-100" alt="{{this.title}}">
+        <img src="{{#if this.thumbnails}}
+    {{#if this.thumbnails.[0]}}
+        /images/{{this.thumbnails.[0]}}
+    {{else}}
+        /images/default.jpg
+    {{/if}}
+{{else}}
+    /images/default.jpg
+{{/if}}" class="d-block w-100" alt="{{this.title}}">
         <div class="card-body">
           <h5 class="card-title">{{this.title}}</h5>
           <p class="card-text">{{this.description}}</p>

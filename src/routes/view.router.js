@@ -36,14 +36,7 @@ router.get("/", productController.getHomePage);
 router.get('/cart', viewController.renderCart);
 router.get("/login", renderLoginPage);
 
-router.get('/', async (req, res) => {
-    const products = await productController.getHomePageData(req);
-    res.render('home', {
-        title: 'Página Inicial',
-        products: products,
-        user: req.session.user // ✅ Certifique-se de que req.session.user é undefined se não logado
-    });
-});
+
 router.get("/cart/:cartId", renderCart);
 
 //router.get('/forgot-password', viewController.renderForgotPassword);

@@ -1,11 +1,13 @@
-require("dotenv").config();
+
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, '..', '.env') });
 const express = require("express");
 const http = require("http");
 const jwtSecret = process.env.JWT_SECRET || "Coder";
 console.log(jwtSecret);
 const handlebars = require("express-handlebars");
 const handlebarsUtils = require("./utils/handlebars.utils");
-const path = require("path");
+
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -49,10 +51,10 @@ const io = new Server(server, {
   },
 });
 
-const upload = multer({ dest: './images/' });
-app.use('/images', upload.single('file'), (req, res) => {
+//const upload = multer({ dest: './images/' });
+//app.use('/images', upload.single('file'), (req, res) => {
   // Handle file upload
-});
+//});
 
 setupSwagger(app);
 // Disponibiliza o io para os controllers acessarem
@@ -77,12 +79,15 @@ app.engine(
       isAdmin: function (user) {
         return user && user.role === "admin";
       },
+      json: function(context) {
+        return JSON.stringify(context);
+    },
       ifEquals: function (arg1, arg2, options) {
         return arg1 == arg2 ? options.fn(this) : options.inverse(this);
       },
       multiply: handlebarsUtils.multiply,
-      renderProductImage: handlebarsUtils.renderProductImage,
-      renderProductImages: handlebarsUtils.renderProductImages,
+      //renderProductImage: handlebarsUtils.renderProductImage,
+      //renderProductImages: handlebarsUtils.renderProductImages,
       formatDate: handlebarsUtils.formatDate,
       formatToBrazilianReal: handlebarsUtils.formatToBrazilianReal,
       findIndex: function (array, comparator) {
